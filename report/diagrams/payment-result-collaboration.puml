@@ -1,0 +1,48 @@
+@startuml
+title Payment Result Reconciliation - Notification and Inquiry
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 12
+skinparam ArrowColor #4A5568
+skinparam ParticipantBorderColor #5B6B82
+
+legend right
+|= Color |= System |
+|<#F4CCCC>| Alipay+ Backend |
+|<#CFE2FF>| Your Backend / ACQP |
+|<#D4F1EA>| Your Mobile App / Frontend |
+|<#F5F5F5>| Storage |
+----
+|<#C0392B>| Red arrows = Alipay+ backend API calls |
+endlegend
+
+participant "Alipay+ Backend" as AP #F4CCCC
+participant "Callback API" as CB #CFE2FF
+participant "Order Service" as OS #CFE2FF
+database "Order DB" as DB #F5F5F5
+participant "Poller / Scheduler" as Poller #CFE2FF
+participant "Your Mobile App / Frontend" as Client #D4F1EA
+
+autonumber "S00"
+
+AP -[#C0392B]> CB: notifyPayment(final status)
+CB -> CB: Validate signature
+CB -> OS: Process notification idempotently
+OS -> DB: Insert event by paymentRequestId
+alt Order not final yet
+  OS -> DB: Mark order SUCCESS or FAILED
+else Order already final
+  OS -> DB: Ignore duplicate callback
+end
+CB -[#C0392B]--> AP: Return SUCCESS
+loop Backoff until final status or expiry
+  Poller -[#C0392B]> AP: inquiryPayment(paymentRequestId or paymentId)
+  AP -[#C0392B]--> Poller: paymentResult S, F, or U
+  Poller -> OS: Apply result idempotently
+  OS -> DB: Update only if not final
+end
+Client -> OS: Query latest status
+OS -> DB: Read order
+OS --> Client: SUCCESS, FAILED, or PAYING
+@enduml

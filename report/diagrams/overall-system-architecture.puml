@@ -1,0 +1,141 @@
+@startuml
+title Overall System Architecture for Alipay+ ACQP Integration
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 14
+skinparam linetype ortho
+skinparam nodesep 40
+skinparam ranksep 45
+skinparam defaultTextAlignment center
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+skinparam ArrowColor #55657D
+skinparam packageBorderColor #5B6B82
+skinparam componentBorderColor #5B6B82
+skinparam databaseBorderColor #5B6B82
+
+legend right
+|= Color |= Domain |
+|<#D4F1EA>| Your consumer-facing frontend |
+|<#E2F7E2>| Your store-side systems |
+|<#CFE2FF>| Your backend / ACQP core |
+|<#FFF2CC>| Your finance / operations |
+|<#FCE5CD>| Alipay+ client / checkout |
+|<#F4CCCC>| Alipay+ backend platform |
+|<#E1D5E7>| External wallet / MPP |
+|<#F5F5F5>| Storage / bank / external accounts |
+endlegend
+
+package "1. Your Consumer Channels" #D4F1EA {
+  rectangle "Mobile App / Web / Result Page" as ConsumerChannels
+}
+
+package "2. Your Store Domain" #E2F7E2 {
+  rectangle "Store POS / ERP / Scanner /\nMerchant QR Display" as StoreSystems
+  rectangle "Store Adapter / POS Middleware" as StoreAdapter
+}
+
+package "3. Your ACQP Platform" #CFE2FF {
+  rectangle "API Gateway" as ApiGateway
+  rectangle "Unified Merchant API" as MerchantAPI
+  rectangle "Payment & Order Core" as PaymentCore
+  rectangle "Callback & Event Flow" as CallbackFlow
+  rectangle "Merchant Ops Services" as MerchantOps
+  rectangle "Reconciliation & Settlement" as Recon
+  rectangle "Internal support:\nsignature / key management\njobs / monitoring\ninternal records" as InternalSupport
+}
+
+package "4. Alipay+ Client Layer" #FCE5CD {
+  rectangle "Alipay+ Checkout / SDK" as Checkout
+}
+
+package "5. Wallet Ecosystem" #E1D5E7 {
+  rectangle "MPP Wallet" as Wallet
+}
+
+package "6. Alipay+ Platform" #F4CCCC {
+  rectangle "Payment APIs" as PaymentApis
+  rectangle "Registration APIs" as RegistrationApis
+  rectangle "Callback Dispatch" as CallbackDispatch
+  rectangle "Reconciliation Reports" as Reports
+}
+
+package "7. Finance / Bank Boundary" #FFF2CC {
+  rectangle "Finance Console" as FinanceConsole
+}
+
+package "8. External Accounts / Banks" #F5F5F5 {
+  rectangle "Clearing Bank" as ClearingBank
+  rectangle "ACQP Settlement Account" as SettlementAccount
+  rectangle "Merchant / Store Bank Account" as MerchantBank
+}
+
+' Layout anchors
+ConsumerChannels -[hidden]down- StoreSystems
+StoreSystems -[hidden]right- StoreAdapter
+ApiGateway -[hidden]right- MerchantAPI
+PaymentCore -[hidden]right- CallbackFlow
+CallbackFlow -[hidden]right- MerchantOps
+MerchantOps -[hidden]right- Recon
+ApiGateway -[hidden]down- MerchantAPI
+MerchantAPI -[hidden]down- PaymentCore
+PaymentCore -[hidden]down- InternalSupport
+Checkout -[hidden]right- Wallet
+PaymentApis -[hidden]right- CallbackDispatch
+CallbackDispatch -[hidden]right- Reports
+ClearingBank -[hidden]right- SettlementAccount
+SettlementAccount -[hidden]right- MerchantBank
+
+' Core payment and store integration chain
+ConsumerChannels --> ApiGateway : A01\ncreate payment / query status
+StoreSystems --> StoreAdapter : A02\nscan code / show QR / submit amount
+StoreAdapter --> MerchantAPI : A03\nnormalized store payment requests
+ApiGateway --> MerchantAPI : A04\nsame payment entry for app / web
+MerchantAPI --> PaymentCore : A05\nroute payment / query / cancel / refund
+MerchantAPI --> MerchantOps : A06\nrefund / registration / merchant operations
+
+' Online and wallet path
+ConsumerChannels --> Checkout : A07\nopen checkout / SDK
+PaymentCore --> PaymentApis : A08\npay / inquiry / cancel / refund
+Checkout --> Wallet : A09\nwallet routing / user confirmation
+Wallet --> CallbackDispatch : A10\npayment result in wallet ecosystem
+
+' Callback and merchant notification path
+CallbackDispatch --> CallbackFlow : A11\nnotifyPayment / notifyRegistrationStatus
+CallbackFlow --> PaymentCore : A12\nverify / idempotency / final state
+CallbackFlow --> MerchantOps : A13\nmerchant notification / post-payment actions
+
+' Funds and operations path
+Recon --> Reports : A14\ndownload transaction / fee / settlement files
+Reports --> ClearingBank : A15\nsettlement batch / instruction
+ClearingBank --> SettlementAccount : A16\nnet settlement funds to ACQP
+MerchantOps --> MerchantBank : A17\nmerchant payout by your own rules
+FinanceConsole --> Recon : A18\nreview reports / settlement facts
+
+note right of StoreAdapter
+Store-side systems connect to your platform here.
+They do not call Alipay+ APIs directly.
+end note
+
+note right of PaymentCore
+Only your backend calls Alipay+ payment APIs.
+Frontend never signs Alipay+ server requests.
+end note
+
+note bottom of InternalSupport
+Internal support capabilities are intentionally not
+drawn as separate lines in this figure.
+They belong inside your platform boundary.
+end note
+
+note right of Recon
+Callback success is operational success.
+Settlement and merchant payout are later financial steps.
+end note
+
+note right of MerchantBank
+Merchant payout is your own contract logic.
+Alipay+ settles at the ACQP layer.
+end note
+@enduml

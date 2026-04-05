@@ -1,0 +1,99 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="760" viewBox="0 0 1280 760" role="img" aria-labelledby="title desc">
+  <title id="title">Online cashier trigger example</title>
+  <desc id="desc">Generic screens showing which buttons trigger the online cashier payment sequence.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f5f9ff"/>
+      <stop offset="100%" stop-color="#eef3fb"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#23314d" flood-opacity=".12"/>
+    </filter>
+    <style>
+      .title { font: 700 26px 'Segoe UI', Arial, sans-serif; fill: #18253a; }
+      .label { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #24354f; }
+      .body { font: 14px 'Segoe UI', Arial, sans-serif; fill: #44546c; }
+      .small { font: 12px 'Segoe UI', Arial, sans-serif; fill: #5e6d84; }
+      .hot { font: 700 13px 'Segoe UI', Arial, sans-serif; fill: #fff; }
+      .tag { font: 700 12px 'Segoe UI', Arial, sans-serif; fill: #9b1c1c; }
+      .box { fill: #fff; stroke: #d7dfeb; stroke-width: 2; rx: 18; }
+      .phone { fill: #0f1726; rx: 28; }
+      .screen { fill: #f8fbff; rx: 18; }
+      .button { fill: #eef3ff; stroke: #bfd0f5; stroke-width: 1.5; rx: 12; }
+      .buttonHot { fill: #d9232e; stroke: #b31622; stroke-width: 1.5; rx: 12; }
+      .callout { fill: #fff4f4; stroke: #d9232e; stroke-width: 2; rx: 14; }
+      .line { stroke: #d9232e; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d9232e"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="760" fill="url(#bg)"/>
+  <text x="40" y="54" class="title">Generic trigger screens: Online cashier payment</text>
+
+  <g filter="url(#shadow)">
+    <rect x="44" y="88" width="356" height="604" class="box"/>
+    <text x="66" y="124" class="label">Screen A. Merchant checkout</text>
+    <rect x="92" y="152" width="260" height="500" class="phone"/>
+    <rect x="110" y="184" width="224" height="436" class="screen"/>
+    <text x="132" y="220" class="label" style="font-size:16px;">Order summary</text>
+    <rect x="132" y="246" width="180" height="18" rx="8" fill="#dfe8f7"/>
+    <rect x="132" y="274" width="128" height="12" rx="6" fill="#e7eef9"/>
+    <rect x="132" y="316" width="180" height="54" class="button"/>
+    <text x="154" y="349" class="body">Card</text>
+    <rect x="132" y="386" width="180" height="54" class="button"/>
+    <text x="154" y="419" class="body">Cash</text>
+    <rect x="132" y="456" width="180" height="62" class="buttonHot"/>
+    <text x="154" y="494" class="hot">Wallet payment</text>
+    <rect x="132" y="548" width="180" height="40" class="button"/>
+    <text x="154" y="573" class="body">Cancel</text>
+    <text x="66" y="678" class="small">User taps the highlighted wallet-payment button.</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="462" y="88" width="356" height="604" class="box"/>
+    <text x="484" y="124" class="label">Screen B. Hosted confirmation</text>
+    <rect x="510" y="152" width="260" height="500" class="phone"/>
+    <rect x="528" y="184" width="224" height="436" class="screen"/>
+    <text x="548" y="220" class="label" style="font-size:16px;">Confirm payment</text>
+    <rect x="548" y="248" width="160" height="14" rx="7" fill="#e0e7f2"/>
+    <rect x="548" y="276" width="120" height="12" rx="6" fill="#edf2fb"/>
+    <rect x="548" y="314" width="182" height="52" class="button"/>
+    <text x="570" y="346" class="body">Choose wallet</text>
+    <rect x="548" y="388" width="182" height="58" class="buttonHot"/>
+    <text x="572" y="424" class="hot">Confirm and continue</text>
+    <rect x="548" y="468" width="182" height="44" class="button"/>
+    <text x="570" y="495" class="body">Back</text>
+    <text x="484" y="678" class="small">The hosted page or SDK screen starts after the wallet-payment choice.</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="880" y="88" width="356" height="604" class="box"/>
+    <text x="902" y="124" class="label">Screen C. Merchant result page</text>
+    <rect x="928" y="152" width="260" height="500" class="phone"/>
+    <rect x="946" y="184" width="224" height="436" class="screen"/>
+    <circle cx="1058" cy="272" r="42" fill="#d8f2df"/>
+    <path d="M1036 273 l14 14 l30 -34" fill="none" stroke="#2f8f4e" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+    <text x="995" y="346" class="label" style="font-size:16px;">Payment result</text>
+    <rect x="976" y="378" width="164" height="44" class="button"/>
+    <text x="998" y="405" class="body">Check status</text>
+    <rect x="976" y="442" width="164" height="54" class="buttonHot"/>
+    <text x="1007" y="476" class="hot">Complete order</text>
+    <text x="902" y="678" class="small">The merchant frontend should query its own backend before closing the flow.</text>
+  </g>
+
+  <g>
+    <rect x="244" y="534" width="228" height="74" class="callout"/>
+    <text x="264" y="560" class="tag">TRIGGER 1</text>
+    <text x="264" y="584" class="body">Tap "Wallet payment"</text>
+    <text x="264" y="604" class="body">Starts S06 -> S10</text>
+    <path d="M472 570 C510 570, 520 516, 540 420" class="line"/>
+
+    <rect x="664" y="438" width="248" height="74" class="callout"/>
+    <text x="684" y="464" class="tag">TRIGGER 2</text>
+    <text x="684" y="488" class="body">Tap "Confirm and continue"</text>
+    <text x="684" y="508" class="body">Moves through S11 -> S18</text>
+    <path d="M912 476 C952 476, 972 476, 980 476" class="line"/>
+  </g>
+</svg>

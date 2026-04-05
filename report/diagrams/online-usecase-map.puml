@@ -1,0 +1,48 @@
+@startuml
+title Online Payment Use Case Map for Alipay+ ACQP
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam dpi 140
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam titleFontSize 16
+skinparam legendFontSize 11
+skinparam actorFontSize 12
+skinparam usecaseFontSize 11
+skinparam packageStyle rectangle
+skinparam usecase {
+  BorderColor #5B6B82
+  FontColor #18212F
+}
+skinparam actorStyle awesome
+
+legend right
+|= Color |= Meaning |
+|<#D4F1EA>| Your frontend / merchant-facing actor |
+|<#CFE2FF>| Your ACQP-side use case |
+|<#FCE5CD>| Alipay+ checkout or SDK assisted step |
+endlegend
+
+actor "User" as User #D4F1EA
+actor "Merchant Frontend\nApp / Web / H5" as Frontend #D4F1EA
+
+rectangle "Online Payment / Cashier Payment" {
+  usecase "UC-Online-1\nUser selects Alipay+\non merchant checkout" as UCO1 #CFE2FF
+  usecase "UC-Online-1A\nConsult payment methods\nand render checkout" as UCO1A #FCE5CD
+  usecase "UC-Online-1B\nCreate payment and\nopen Alipay+ checkout" as UCO1B #CFE2FF
+  usecase "UC-Online-1C\nReturn result and\nquery final status" as UCO1C #CFE2FF
+}
+
+User --> UCO1
+Frontend --> UCO1
+UCO1 .> UCO1A : include
+UCO1 .> UCO1B : include
+UCO1 .> UCO1C : include
+
+note bottom of UCO1
+Official product term:
+Online Payment / Cashier Payment
+end note
+@enduml

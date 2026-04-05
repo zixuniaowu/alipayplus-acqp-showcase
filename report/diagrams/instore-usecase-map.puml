@@ -1,0 +1,57 @@
+@startuml
+title In-store Payment Use Case Map for Alipay+ ACQP
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam dpi 140
+skinparam defaultFontName Arial
+skinparam defaultFontSize 12
+skinparam titleFontSize 16
+skinparam legendFontSize 11
+skinparam actorFontSize 12
+skinparam usecaseFontSize 11
+skinparam packageStyle rectangle
+skinparam usecase {
+  BorderColor #5B6B82
+  FontColor #18212F
+}
+skinparam actorStyle awesome
+
+legend right
+|= Color |= Meaning |
+|<#D4F1EA>| Your side / Merchant actor |
+|<#CFE2FF>| Your ACQP domain use case |
+|<#FCE5CD>| Alipay+ assisted flow |
+endlegend
+
+actor "Consumer" as Consumer #D4F1EA
+actor "Merchant Staff / POS" as Merchant #D4F1EA
+
+rectangle "In-store Payment Modes" {
+  usecase "UC-1\nUser-presented Mode\nCustomer shows code,\nmerchant scans" as UC1 #CFE2FF
+  usecase "UC-2\nMerchant-presented Mode\nMerchant shows QR,\ncustomer scans" as UC2 #CFE2FF
+  usecase "UC-2A\nEntry Code\nStatic QR" as UC2A #FCE5CD
+  usecase "UC-2B\nOrder Code\nAlipay+ dynamic QR" as UC2B #FCE5CD
+  usecase "UC-2C\nPrivate Order Code\nACQP dynamic QR" as UC2C #FCE5CD
+}
+
+Consumer --> UC1
+Merchant --> UC1
+Consumer --> UC2
+Merchant --> UC2
+
+UC2 .> UC2A : variant
+UC2 .> UC2B : variant
+UC2 .> UC2C : variant
+
+note bottom of UC1
+Official product term:
+User-presented Mode Payment
+end note
+
+note bottom of UC2
+Official product term:
+Merchant-presented Mode Payment
+end note
+@enduml

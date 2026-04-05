@@ -1,0 +1,52 @@
+@startuml
+title Recommended Internal Order State Machine for Alipay+ Cashier Payment
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 12
+skinparam ArrowColor #4A5568
+skinparam state {
+  BorderColor #5B6B82
+  BackgroundColor #DAE8FC
+  FontColor #18212F
+}
+skinparam state<<success>> {
+  BackgroundColor #D5E8D4
+}
+skinparam state<<failure>> {
+  BackgroundColor #F8CECC
+}
+skinparam state<<warning>> {
+  BackgroundColor #FFF2CC
+}
+
+[*] --> CREATED
+CREATED --> PAYING : pay accepted\nPAYMENT_IN_PROCESS
+CREATED --> FAILED : pay failed
+
+PAYING --> SUCCESS : notifyPayment/inquiryPayment\npaymentResult=S
+PAYING --> FAILED : notifyPayment/inquiryPayment\npaymentResult=F and not closed
+PAYING --> CANCELLED : cancelPayment success
+PAYING --> FAILED : payment expired and final fail
+
+SUCCESS --> REFUND_PENDING : refund submitted
+REFUND_PENDING --> REFUNDED : full refund success
+REFUND_PENDING --> PARTIALLY_REFUNDED : partial refund success
+PARTIALLY_REFUNDED --> REFUNDED : remaining refund success
+
+FAILED --> [*]
+CANCELLED --> [*]
+REFUNDED --> [*]
+
+note right of PAYING
+Notification and polling both write to the
+same order record and must be idempotent.
+end note
+
+state SUCCESS <<success>>
+state REFUNDED <<success>>
+state PARTIALLY_REFUNDED <<success>>
+state FAILED <<failure>>
+state CANCELLED <<failure>>
+state PAYING <<warning>>
+state REFUND_PENDING <<warning>>
+@enduml

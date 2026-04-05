@@ -1,0 +1,49 @@
+@startuml
+title Post-Payment Operations - Cancel or Refund
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 12
+skinparam ArrowColor #4A5568
+skinparam ParticipantBorderColor #5B6B82
+skinparam ActorBorderColor #5B6B82
+
+legend right
+|= Color |= System |
+|<#FFF2CC>| Merchant / Operations |
+|<#CFE2FF>| Your Backend / ACQP |
+|<#F4CCCC>| Alipay+ Backend |
+----
+|<#C0392B>| Red arrows = Alipay+ backend API calls |
+endlegend
+
+actor "Merchant or Ops" as Ops #FFF2CC
+participant "Your Backend / ACQP" as ACQP #CFE2FF
+participant "Alipay+ Backend" as AP #F4CCCC
+
+autonumber "S00"
+
+alt Final payment status not obtained before expiry
+  Ops -> ACQP: Cancel payment
+  ACQP -[#C0392B]> AP: cancelPayment(paymentRequestId)
+  AP -[#C0392B]--> ACQP: cancel result
+  ACQP -> Ops: Close order based on response
+else Payment succeeded and reversal is needed
+  Ops -> ACQP: Refund payment
+  ACQP -[#C0392B]> AP: refund(paymentRequestId,\nrefundRequestId,\nrefundAmount)
+  AP -[#C0392B]--> ACQP: refund result S, F, or U
+  alt Refund success
+    ACQP -> Ops: Mark refunded or partially refunded
+  else Refund unknown
+    ACQP -[#C0392B]> AP: Retry same refundRequestId
+    AP -[#C0392B]--> ACQP: Final refund result
+  else Refund failed
+    ACQP -> Ops: Correct request and retry
+  end
+end
+
+note over ACQP, AP
+cancelPayment uses paymentRequestId for idempotency.
+refund uses refundRequestId for idempotency.
+end note
+@enduml

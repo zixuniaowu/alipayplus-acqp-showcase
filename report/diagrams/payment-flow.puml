@@ -1,0 +1,63 @@
+@startuml
+title Alipay+ Cashier Payment - End-to-End Flow
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 12
+skinparam ArrowColor #4A5568
+skinparam ParticipantBorderColor #5B6B82
+skinparam ActorBorderColor #5B6B82
+
+legend right
+|= Color |= System |
+|<#FFF2CC>| User |
+|<#D4F1EA>| Your Mobile App / Frontend |
+|<#CFE2FF>| Your Backend / ACQP |
+|<#FCE5CD>| Alipay+ Client / SDK / Checkout |
+|<#F4CCCC>| Alipay+ Backend / Platform |
+|<#E1D5E7>| MPP Wallet |
+----
+|<#2F80ED>| Blue arrows = Alipay+ SDK / checkout calls |
+|<#C0392B>| Red arrows = Alipay+ backend API calls |
+|<#4A5568>| Gray arrows = non-Alipay API / SDK steps |
+endlegend
+
+actor User #FFF2CC
+participant "Your Mobile App / Web" as Client #D4F1EA
+participant "Your Backend / ACQP" as ACQP #CFE2FF
+participant "Alipay+ Checkout / SDK" as APC #FCE5CD
+participant "Alipay+ Backend" as AP #F4CCCC
+participant "MPP Wallet" as MPP #E1D5E7
+
+autonumber "S00"
+
+User -> Client: Place order
+opt Render payment method
+  Client -> ACQP: Request payment-method options
+  ACQP -[#C0392B]> AP: consultPayment(order, env, settlement)
+  AP -[#C0392B]--> ACQP: payment method list / promo / logo metadata
+  ACQP --> Client: Renderable payment method data
+end
+User -> Client: Select Alipay+
+Client -> ACQP: Create payment
+ACQP -[#C0392B]> AP: pay(paymentRequestId,\npaymentNotifyUrl,\npaymentRedirectUrl,\npaymentMethodType=CONNECT_WALLET,\npresentmentMode=UNIFIED)
+AP -[#C0392B]--> ACQP: resultStatus=U,\npaymentId,\nnormalUrl or paymentData
+ACQP --> Client: Checkout payload
+Client -[#2F80ED]> APC: Open normalUrl or SDK checkout
+User -> AP: Choose wallet on checkout page
+APC -> MPP: Redirect, deep link, or QR
+User -> MPP: Authenticate and confirm payment
+MPP --> APC: Final payment result
+APC -[#2F80ED]--> AP: Final payment result
+AP -[#C0392B]> ACQP: notifyPayment(success or fail)
+ACQP -[#C0392B]--> AP: HTTP 200 + resultStatus=S
+
+opt Callback missing or status still uncertain
+  ACQP -[#C0392B]> AP: inquiryPayment(paymentRequestId or paymentId)
+  AP -[#C0392B]--> ACQP: paymentResult S, F, or U
+end
+
+Client -> ACQP: Query order status
+ACQP --> Client: Final order status
+Client -> User: Show payment result page
+@enduml

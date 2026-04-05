@@ -1,0 +1,137 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1280" height="820" viewBox="0 0 1280 820" role="img" aria-labelledby="title desc">
+  <title id="title">Merchant-presented trigger example</title>
+  <desc id="desc">Generic screens showing three merchant-presented branches and the user actions that trigger each sequence.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0%" stop-color="#f7fbff"/>
+      <stop offset="100%" stop-color="#eef4fb"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="12" stdDeviation="14" flood-color="#23314d" flood-opacity=".12"/>
+    </filter>
+    <marker id="arrow" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+      <path d="M0,0 L10,5 L0,10 z" fill="#d9232e"/>
+    </marker>
+    <style>
+      .title { font: 700 26px 'Segoe UI', Arial, sans-serif; fill: #18253a; }
+      .label { font: 700 18px 'Segoe UI', Arial, sans-serif; fill: #24354f; }
+      .body { font: 14px 'Segoe UI', Arial, sans-serif; fill: #44546c; }
+      .small { font: 12px 'Segoe UI', Arial, sans-serif; fill: #5e6d84; }
+      .hot { font: 700 13px 'Segoe UI', Arial, sans-serif; fill: #fff; }
+      .tag { font: 700 12px 'Segoe UI', Arial, sans-serif; fill: #9b1c1c; }
+      .box { fill: #fff; stroke: #d7dfeb; stroke-width: 2; rx: 18; }
+      .card { fill: #fbfdff; stroke: #d7dfeb; stroke-width: 2; rx: 18; }
+      .phone { fill: #0f1726; rx: 24; }
+      .screen { fill: #f8fbff; rx: 16; }
+      .button { fill: #eef3ff; stroke: #bfd0f5; stroke-width: 1.5; rx: 12; }
+      .buttonHot { fill: #d9232e; stroke: #b31622; stroke-width: 1.5; rx: 12; }
+      .callout { fill: #fff4f4; stroke: #d9232e; stroke-width: 2; rx: 14; }
+      .line { stroke: #d9232e; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+    </style>
+  </defs>
+  <rect width="1280" height="820" fill="url(#bg)"/>
+  <text x="40" y="54" class="title">Generic trigger screens: Merchant-presented payment</text>
+
+  <g filter="url(#shadow)">
+    <rect x="40" y="90" width="380" height="300" class="box"/>
+    <text x="64" y="126" class="label">Branch A. Entry Code</text>
+    <rect x="70" y="156" width="148" height="200" class="card"/>
+    <text x="94" y="188" class="label" style="font-size:16px;">Store QR stand</text>
+    <rect x="102" y="210" width="84" height="84" fill="#fff" stroke="#d1dae8" stroke-width="2"/>
+    <path d="M112 220 h16 v16 h-16 z M160 220 h16 v16 h-16 z M112 268 h16 v16 h-16 z" fill="#111827"/>
+    <text x="86" y="324" class="small">Static store code</text>
+    <rect x="238" y="156" width="152" height="200" class="phone"/>
+    <rect x="252" y="182" width="124" height="158" class="screen"/>
+    <text x="270" y="212" class="body">Scan store code</text>
+    <rect x="270" y="236" width="88" height="52" class="buttonHot"/>
+    <text x="289" y="268" class="hot">Scan</text>
+    <text x="64" y="374" class="small">After scan, the customer lands on a merchant page to confirm amount.</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="450" y="90" width="380" height="300" class="box"/>
+    <text x="474" y="126" class="label">Branch B. Order Code</text>
+    <rect x="480" y="156" width="148" height="200" class="card"/>
+    <text x="500" y="188" class="label" style="font-size:16px;">POS screen</text>
+    <rect x="502" y="214" width="104" height="44" class="buttonHot"/>
+    <text x="515" y="241" class="hot">Generate QR</text>
+    <rect x="512" y="276" width="84" height="84" fill="#fff" stroke="#d1dae8" stroke-width="2"/>
+    <path d="M522 286 h16 v16 h-16 z M570 286 h16 v16 h-16 z M522 334 h16 v16 h-16 z" fill="#111827"/>
+    <rect x="648" y="156" width="152" height="200" class="phone"/>
+    <rect x="662" y="182" width="124" height="158" class="screen"/>
+    <text x="680" y="212" class="body">Scan dynamic code</text>
+    <rect x="680" y="236" width="88" height="52" class="button"/>
+    <text x="699" y="268" class="body">Scan</text>
+    <text x="474" y="374" class="small">The store asks ACQP for a dynamic order first, then displays the returned code.</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="860" y="90" width="380" height="300" class="box"/>
+    <text x="884" y="126" class="label">Branch C. Private Order Code</text>
+    <rect x="890" y="156" width="148" height="200" class="card"/>
+    <text x="910" y="188" class="label" style="font-size:16px;">POS screen</text>
+    <rect x="912" y="214" width="104" height="44" class="buttonHot"/>
+    <text x="930" y="241" class="hot">Get code</text>
+    <rect x="922" y="276" width="84" height="84" fill="#fff" stroke="#d1dae8" stroke-width="2"/>
+    <path d="M932 286 h16 v16 h-16 z M980 286 h16 v16 h-16 z M932 334 h16 v16 h-16 z" fill="#111827"/>
+    <rect x="1058" y="156" width="152" height="200" class="phone"/>
+    <rect x="1072" y="182" width="124" height="158" class="screen"/>
+    <text x="1088" y="212" class="body">Scan private code</text>
+    <rect x="1090" y="236" width="88" height="52" class="button"/>
+    <text x="1109" y="268" class="body">Scan</text>
+    <text x="884" y="374" class="small">The private code is issued by ACQP and decoded with ACQP participation.</text>
+  </g>
+
+  <g filter="url(#shadow)">
+    <rect x="40" y="434" width="1200" height="318" class="box"/>
+    <text x="64" y="470" class="label">Common confirmation and completion screens</text>
+    <rect x="98" y="510" width="232" height="188" class="phone"/>
+    <rect x="112" y="536" width="204" height="146" class="screen"/>
+    <text x="132" y="566" class="label" style="font-size:16px;">Wallet confirm</text>
+    <rect x="132" y="594" width="164" height="54" class="buttonHot"/>
+    <text x="156" y="628" class="hot">Confirm payment</text>
+
+    <rect x="390" y="510" width="232" height="188" class="phone"/>
+    <rect x="404" y="536" width="204" height="146" class="screen"/>
+    <text x="424" y="566" class="label" style="font-size:16px;">Merchant status</text>
+    <rect x="424" y="594" width="164" height="54" class="button"/>
+    <text x="452" y="628" class="body">Refresh status</text>
+
+    <rect x="682" y="510" width="232" height="188" class="phone"/>
+    <rect x="696" y="536" width="204" height="146" class="screen"/>
+    <text x="716" y="566" class="label" style="font-size:16px;">Store result</text>
+    <rect x="716" y="594" width="164" height="54" class="button"/>
+    <text x="748" y="628" class="body">Complete sale</text>
+
+    <rect x="960" y="526" width="232" height="160" class="card"/>
+    <text x="984" y="562" class="label" style="font-size:16px;">Common endings</text>
+    <text x="984" y="596" class="body">Wallet confirm triggers the common</text>
+    <text x="984" y="620" class="body">result path and notify / inquiry steps.</text>
+  </g>
+
+  <g>
+    <rect x="170" y="312" width="208" height="74" class="callout"/>
+    <text x="190" y="338" class="tag">TRIGGER A</text>
+    <text x="190" y="362" class="body">Customer scans store code</text>
+    <text x="190" y="382" class="body">Starts S02 -> S09</text>
+    <path d="M378 350 C420 350, 500 350, 546 242" class="line"/>
+
+    <rect x="578" y="312" width="214" height="74" class="callout"/>
+    <text x="598" y="338" class="tag">TRIGGER B</text>
+    <text x="598" y="362" class="body">POS taps "Generate QR"</text>
+    <text x="598" y="382" class="body">Starts S10 -> S16</text>
+    <path d="M792 350 C830 350, 888 350, 1000 350" class="line"/>
+
+    <rect x="984" y="312" width="216" height="74" class="callout"/>
+    <text x="1004" y="338" class="tag">TRIGGER C</text>
+    <text x="1004" y="362" class="body">POS taps "Get code"</text>
+    <text x="1004" y="382" class="body">Starts S17 -> S23</text>
+    <path d="M1092 386 C1092 424, 1092 460, 1092 510" class="line"/>
+
+    <rect x="176" y="692" width="250" height="74" class="callout"/>
+    <text x="196" y="718" class="tag">COMMON TRIGGER</text>
+    <text x="196" y="742" class="body">Tap "Confirm payment"</text>
+    <text x="196" y="762" class="body">Moves through S24 -> S33</text>
+    <path d="M426 728 C500 728, 560 728, 716 628" class="line"/>
+  </g>
+</svg>

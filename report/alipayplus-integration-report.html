@@ -1,0 +1,780 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Alipay+ ACQP Integration Report</title>
+  <style>
+    :root { --bg:#f5f7fb; --panel:#fff; --text:#172033; --muted:#5d6b82; --border:#d7dfeb; --accent:#0e5bd8; --soft:#edf3ff; }
+    * { box-sizing:border-box; }
+    body { margin:0; font:15px/1.65 "Segoe UI","Noto Sans SC","Noto Sans JP",sans-serif; color:var(--text); background:linear-gradient(180deg,#f7f9fc 0%,#eef3fb 100%); }
+    a { color:var(--accent); text-decoration:none; }
+    a:hover { text-decoration:underline; }
+    .shell { width:100%; max-width:none; padding:18px 22px 64px; }
+    .hero { background:linear-gradient(135deg,#0f2f68 0%,#1449a7 54%,#2b7af0 100%); color:#fff; border-radius:18px; padding:28px 30px; margin-bottom:16px; box-shadow:0 18px 48px rgba(16,48,104,.18); }
+    .hero h1 { margin:0 0 10px; font-size:30px; }
+    .hero p { margin:0; max-width:1100px; color:rgba(255,255,255,.92); }
+    .toolbar { position:sticky; top:0; z-index:20; display:flex; gap:10px; align-items:center; padding:12px 0 14px; backdrop-filter:blur(10px); background:rgba(245,247,251,.9); }
+    .toolbar button { border:1px solid var(--border); background:var(--panel); color:var(--text); padding:8px 14px; border-radius:999px; cursor:pointer; font-weight:600; }
+    .toolbar button.active { background:#143f8f; border-color:#143f8f; color:#fff; }
+    .lang-pane { display:none; }
+    .lang-pane.active { display:block; }
+    .file-list { display:flex; flex-wrap:wrap; gap:10px; margin-bottom:18px; padding:12px 14px; background:rgba(255,255,255,.75); border:1px solid var(--border); border-radius:12px; }
+    .file-list a { padding:6px 10px; border-radius:999px; background:var(--soft); border:1px solid #cad8f4; font-size:13px; }
+    .section { background:var(--panel); border:1px solid var(--border); border-radius:18px; padding:22px 24px; margin-bottom:16px; box-shadow:0 10px 30px rgba(24,40,72,.05); }
+    .section h2 { margin:0 0 12px; font-size:24px; }
+    .section h3 { margin:18px 0 10px; font-size:18px; }
+    figure.diagram { margin:18px 0 10px; padding:16px; border:1px solid var(--border); border-radius:14px; background:#fbfcff; }
+    figure.diagram figcaption { font-weight:700; margin-bottom:12px; }
+    figure.diagram img { display:block; width:auto; max-width:100%; max-height:70vh; margin:0 auto; cursor:zoom-in; }
+    figure.diagram.compact { margin:0; }
+    .visual-grid { display:grid; grid-template-columns:1fr; gap:14px; margin:14px 0 10px; }
+    .visual-grid.two { grid-template-columns:repeat(2, minmax(0, 1fr)); }
+    .visual-note { margin:8px 0 0; color:var(--muted); font-size:13px; }
+    @media (max-width: 900px) { .visual-grid.two { grid-template-columns:1fr; } }
+    table { width:100%; border-collapse:collapse; margin:12px 0 4px; background:#fff; }
+    th, td { text-align:left; vertical-align:top; border:1px solid var(--border); padding:10px 12px; }
+    th { background:#eef4ff; font-weight:700; }
+    ul { margin:8px 0; padding-left:22px; }
+    details { margin-top:10px; border:1px solid var(--border); border-radius:12px; background:#fafcff; overflow:hidden; }
+    summary { cursor:pointer; padding:10px 12px; font-weight:600; }
+    pre { margin:0; padding:14px; overflow:auto; background:#f7f9fd; border-top:1px solid var(--border); font:12px/1.5 Consolas,"Courier New",monospace; }
+    #lightbox { position:fixed; inset:0; background:rgba(12,18,31,.9); display:none; align-items:center; justify-content:center; padding:18px; z-index:50; }
+    #lightbox.open { display:flex; }
+    .lightbox-panel { width:min(98vw, 1800px); height:min(94vh, 1200px); display:flex; flex-direction:column; background:#0f1726; border:1px solid rgba(255,255,255,.18); border-radius:14px; box-shadow:0 18px 48px rgba(0,0,0,.45); overflow:hidden; }
+    .lightbox-toolbar { display:flex; align-items:center; gap:10px; padding:10px 12px; background:#13203a; color:#f8fbff; border-bottom:1px solid rgba(255,255,255,.12); }
+    .lightbox-toolbar strong { font-size:14px; }
+    .lightbox-toolbar span { color:rgba(255,255,255,.78); font-size:12px; }
+    .lightbox-toolbar button,
+    .lightbox-toolbar a { border:1px solid rgba(255,255,255,.18); background:#1c2d4f; color:#fff; padding:7px 10px; border-radius:999px; cursor:pointer; text-decoration:none; font-size:12px; }
+    .lightbox-toolbar .spacer { flex:1; }
+    .lightbox-stage { flex:1; overflow:auto; background:#eef3fb; padding:20px; }
+    #lightbox img { display:block; max-width:none; max-height:none; background:#fff; border-radius:10px; box-shadow:0 10px 30px rgba(0,0,0,.18); transform-origin:top left; }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="hero">
+      <h1>Alipay+ ACQP Integration Report</h1>
+      <p>This report is aligned to the official Alipay+ ACQP overview and focuses on the three payment product lines, the cross-system architecture, deployment topology, and the funds / reconciliation boundary needed for real implementation.</p>
+    </header>
+    <div class="toolbar">
+      <button class="lang-btn active" data-lang="zh">中文</button>
+      <button class="lang-btn" data-lang="en">English</button>
+      <button class="lang-btn" data-lang="ja">日本語</button>
+    </div>
+    <main>
+      <div class="lang-pane active" data-lang-pane="zh">
+        <div class="file-list">
+          <a href="./diagrams/online-usecase-map.svg">online-usecase-map.svg</a>
+          <a href="./diagrams/instore-usecase-map.svg">instore-usecase-map.svg</a>
+          <a href="./diagrams/payment-flow.svg">payment-flow.svg</a>
+          <a href="./diagrams/upm-sequence.svg">upm-sequence.svg</a>
+          <a href="./diagrams/mpm-sequence.svg">mpm-sequence.svg</a>
+          <a href="./diagrams/overall-system-architecture.svg">overall-system-architecture.svg</a>
+          <a href="./diagrams/deployment-topology.svg">deployment-topology.svg</a>
+          <a href="./diagrams/funds-and-reconciliation-flow.svg">funds-and-reconciliation-flow.svg</a>
+        </div>
+        <section class="section" id="zh-purpose">
+          <h2>报告说明</h2>
+          <p>这份报告不是单纯的 API 摘录，也不是只看某一张流程图的笔记，而是一份面向接入评审和系统设计的集成说明。目标读者包括产品经理、架构师、后端工程师、移动端工程师、门店系统负责人，以及需要确认资金与对账边界的财务或运营人员。</p>
+          <p>报告讨论的是 <strong>ACQP 视角</strong> 的 Alipay+ 集成，也就是“你自己的前端、门店系统和后台，如何接入 Alipay+”。因此文中会同时回答产品模式选择、系统责任划分、结果收敛方式，以及资金与结算边界这几类问题。</p>
+        </section>
+        <section class="section" id="zh-terms">
+          <h2>术语与口径约定</h2>
+          <p>下面这些词在不同团队、不同系统里常常会被说成不同意思。这里先把本报告采用的口径固定下来，避免后面读图和读 API 时发生误解。</p>
+          <table>
+            <thead><tr><th>术语</th><th>本报告中的含义</th><th>为什么要先说明</th></tr></thead>
+            <tbody>
+              <tr><td><code>ACQP 视角</code></td><td>站在你这一侧的收单平台来解释系统、API、回调、对账和结算，不站在钱包侧解释内部实现。</td><td>这样读到“应该做什么”时，默认主语就是你的系统。</td></tr>
+              <tr><td><code>Online Payment</code></td><td>在本报告中专指官方 overview 里的 <code>Online Payment / Cashier Payment</code> 产品线，不泛指所有线上数字支付。</td><td>避免把“线上支付”误解成任意 App 内支付、任意 H5 支付或任意第三方支付。</td></tr>
+              <tr><td><code>Cashier Payment</code></td><td>从商户 App / Web 收银台发起，用户进入 Alipay+ checkout 或 SDK 流程完成支付的线上模式。</td><td>它和线下扫码不是一回事，即使某些钱包在 Web 场景里会出现二维码。</td></tr>
+              <tr><td><code>In-store Payment</code></td><td>官方 overview 里的线下支付总类，下面再分 <code>User-presented</code> 和 <code>Merchant-presented</code>。</td><td>先区分“线上 / 线下”，再区分线下内部的两种主模式。</td></tr>
+              <tr><td><code>User-presented</code></td><td>用户出示付款码，门店扫描。用户码由钱包侧生成并展示，你的系统从门店扫到码之后开始。</td><td>避免误以为用户付款码由 ACQP 或门店系统生成。</td></tr>
+              <tr><td><code>Merchant-presented</code></td><td>门店展示二维码，用户扫描。它只表示“店铺展示码”，不表示“二维码一定由 Alipay+ 生成”。</td><td>这是最容易被误解的点，尤其是 `Entry Code / Order Code / Private Order Code` 三种码源不同。</td></tr>
+              <tr><td><code>MPP / wallet ecosystem</code></td><td>用户实际使用的钱包 App 及其后台生态，属于外部系统，不是你要开发的内部模块。</td><td>这样看到灰线时，就知道那是非 Alipay API / SDK 步骤，其中可能包含钱包侧协作或你方内部动作。</td></tr>
+              <tr><td><code>线条颜色</code></td><td>红线表示调用 Alipay+ 服务端 API；蓝线表示调用 Alipay+ 客户端能力（checkout / SDK）；灰线表示其它非 Alipay API / SDK 步骤。</td><td>灰线不等于“没有官方依据”。灰色步骤如果带链接，表示官方流程文档对该动作有描述，但它本身不是 Alipay API。</td></tr>
+              <tr><td><code>callback</code></td><td>Alipay+ 异步通知你的后台支付结果或报备结果。</td><td>它是结果收敛主路径，但不等于资金已经结算完成。</td></tr>
+              <tr><td><code>reconciliation</code></td><td>对账。用交易报表、费用报表、结算报表和银行事实去核对交易。</td><td>对账是真实财务口径，不应和前台“支付成功”混成一层。</td></tr>
+              <tr><td><code>settlement</code></td><td>Alipay+ 与 ACQP 之间的资金结算完成。</td><td>这不是“你给商户打款完成”的同义词。</td></tr>
+              <tr><td><code>merchant payout</code></td><td>你根据自己合同规则给商户 / 门店打款。</td><td>这部分不是 Alipay+ 官方替你定义的，而是你的结算引擎逻辑。</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="section" id="zh-questions">
+          <h2>本报告解决什么问题</h2>
+          <table>
+            <thead><tr><th>问题</th><th>本报告如何回答</th></tr></thead>
+            <tbody>
+              <tr><td>我到底要接哪一种支付模式？</td><td>先从线上 Cashier Payment、线下 User-presented、线下 Merchant-presented 三条产品线拆开说明。</td></tr>
+              <tr><td>手机应用、门店 POS、后台分别应该做什么？</td><td>在每个 Use Case 后面给出时序图、调用边界和官方 API 映射。</td></tr>
+              <tr><td>门店系统如何并入我现有平台？</td><td>通过图 0 和图 0B 解释系统构造、部署分层和门店接入边界。</td></tr>
+              <tr><td>钱怎么算，什么时候才能算“真的成功”？</td><td>在资金、对账与结算章节区分 callback、对账、结算、商户打款四个层次。</td></tr>
+            </tbody>
+          </table>
+          <p>推荐阅读顺序是：先看这里的说明，再看产品模式和 Use Case，然后看整体系统构造与部署，最后看资金、对账与共享后台能力。</p>
+        </section>
+        <section class="section" id="zh-overview">
+          <h2>与官方总览页的对应关系</h2>
+          <p>官方入口是 <a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a>。本报告按该页产品结构组织：线上对应 Cashier Payment，线下对应 User-presented 与 Merchant-presented，运营能力对应 Registration 与 Reconciliation。</p>
+          <ul>
+            <li>先看产品线与 Use Case，再看对应时序图。</li>
+            <li>再看图 0 与图 0B，理解门店系统、你的平台、Alipay+ 的边界与部署。</li>
+            <li>最后看资金、对账、退款、注册和状态机，确认结果收敛与财务边界。</li>
+          </ul>
+        </section>
+        <section class="section" id="zh-nav">
+          <h2>阅读导航</h2>
+          <p>如果你的目标是“从一种支付模式一路读到落地实现”，建议按下面顺序阅读，而不是在架构图和 API 表之间来回跳。</p>
+          <ul>
+            <li><a href="#zh-online">线上 Cashier Payment</a>：先看线上收银台场景、主时序和对应 API。</li>
+            <li><a href="#zh-store-user">线下 User-presented</a>：再看用户出示付款码、门店扫码的线下模式。</li>
+            <li><a href="#zh-store-merchant">线下 Merchant-presented</a>：然后看用户扫店铺码的三种分支。</li>
+            <li><a href="#zh-arch">图 0. 整体系统构造图</a>：理解门店系统如何并入你现有平台。</li>
+            <li><a href="#zh-deploy">图 0B. 推荐部署拓扑图</a>：理解部署边界、回调入口和密钥放置位置。</li>
+            <li><a href="#zh-funds">如何算钱</a>：最后确认钱怎么算、何时算最终成功。</li>
+          </ul>
+        </section>
+        <section class="section" id="zh-online">
+          <h2>UC-Online-1. 线上 Cashier Payment 集成</h2>
+          <p>官方入口是 <a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a>。线上模式起点是商户 App/Web 收银台，不是门店二维码。</p><p>本报告把 <code>consultPayment</code> 画进主链路，是因为官方文档明确提供了它来获取钱包、促销和 logo 等展示信息。它适合“由自有后台统一控制支付方式展示”的实现路径；如果你的收银台已经预配置了支付方式，<code>S02-S05</code> 可以被简化，但 <code>pay / notifyPayment / inquiryPayment</code> 的后端职责不会消失。</p>
+          <h3>触发画面与官方样例</h3>
+          <p>先看用户会在什么画面点击什么按钮，再去读时序。下面两张图来自官方 UX 文档；按钮级触发图是为了把“点击动作”和时序号对齐而补充的通用示意，不代表官方 UI 外观。</p>
+          <div class="visual-grid two">
+            <figure class="diagram compact"><figcaption>官方样例：商户收银台页面</figcaption><img src="./official-samples/ux-web-2.png" alt="official cashier page sample"><p class="visual-note">来源：<a href="https://docs.alipayplus.com/alipayplus/alipayplus/ux/ux_web" target="_blank" rel="noreferrer">Cashier Payment - Web | UX Design Guidelines</a></p></figure>
+            <figure class="diagram compact"><figcaption>官方样例：结果确认/结果页</figcaption><img src="./official-samples/ux-web-1.png" alt="official result page sample"><p class="visual-note">来源：<a href="https://docs.alipayplus.com/alipayplus/alipayplus/ux/ux_web" target="_blank" rel="noreferrer">Cashier Payment - Web | UX Design Guidelines</a></p></figure>
+          </div>
+          <figure class="diagram"><figcaption>通用触发示意：哪个按钮会触发线上主链路</figcaption><img src="./diagrams/ui-online-cashier-trigger.svg" alt="generic online trigger screens"></figure>
+          <table>
+            <thead><tr><th>画面</th><th>动作</th><th>触发的序列号</th><th>作用</th></tr></thead>
+            <tbody>
+              <tr><td>商户收银台</td><td>点击 <code>Wallet payment</code> 一类入口</td><td><code>S06-S10</code></td><td>用户选中支付方式后，你的前端向自有后台发起建单并进入官方 checkout / SDK 链路。</td></tr>
+              <tr><td>官方 checkout / SDK 页</td><td>点击确认继续支付</td><td><code>S11-S18</code></td><td>用户进入钱包选择、确认和回传结果阶段。</td></tr>
+              <tr><td>商户结果页</td><td>点击刷新状态 / 完成订单</td><td><code>S21-S23</code></td><td>你的前端回到自有后台确认最终状态，再结束订单流程。</td></tr>
+            </tbody>
+          </table>
+          <figure class="diagram"><figcaption>画面-时序联动图：线上 Cashier Payment</figcaption><img src="./diagrams/ui-sequence-online-composite.png" alt="online screen to sequence linkage"><p class="visual-note">这张图把“用户在什么画面执行什么动作”与主时序段和最终结果页联动起来。产品经理可先看入口与回流，前端可看页面跳转与状态刷新，后端可看哪些时序段需要自己实现。</p></figure>
+          <figure class="diagram"><figcaption>线上 Cashier Payment Use Case</figcaption><img src="./diagrams/online-usecase-map.svg" alt="online use case"></figure>
+          <figure class="diagram"><figcaption>图 1. 线上 Cashier Payment 主链路</figcaption><img src="./diagrams/payment-flow.svg" alt="cashier payment flow"></figure>
+          <p>读图提示：颜色现在只表达“调用类型”。红线表示调用 Alipay+ 服务端 API，蓝线表示调用 Alipay+ 客户端能力（checkout / SDK），灰线表示非 Alipay API / SDK 的其它步骤，例如用户动作、自有系统内部调用、门店终端动作，以及钱包生态内部协作。</p>
+          <p>表里的“官方依据”列不是说每一步都是 API。灰色步骤如果带官方链接，表示官方流程文档对这一动作有描述，可用来核对流程正确性。</p>
+          <table>
+            <thead><tr><th>序列号</th><th>线条颜色</th><th>跨系统调用</th><th>官方依据（API / 流程文档）</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>S01</td><td>灰色</td><td><code>User</code> → <code>Client</code> 下单</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>用户先在你的 App / Web 收银台创建业务订单，支付流程从这里起步。</td></tr>
+              <tr><td>S02</td><td>灰色</td><td><code>Client</code> → <code>ACQP</code> 请求支付方式选项</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>这是你前端向自己后台拿支付方式展示数据的内部调用。</td></tr>
+              <tr><td>S03</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 查询支付方式</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/consult_payment" target="_blank" rel="noreferrer">consultPayment</a></td><td>后台对后台查询可用钱包、促销、logo 等展示信息。</td></tr>
+              <tr><td>S04</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 返回支付方式信息</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/consult_payment" target="_blank" rel="noreferrer">consultPayment</a></td><td>返回的是可渲染元数据，不是最终支付结果。</td></tr>
+              <tr><td>S05</td><td>灰色</td><td><code>ACQP</code> → <code>Client</code> 返回可渲染支付方式数据</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>你的前端据此展示 `Alipay+` 入口，而不是直接渲染官方原始响应。</td></tr>
+              <tr><td>S06</td><td>灰色</td><td><code>User</code> → <code>Client</code> 选择 Alipay+</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>这是用户在你收银台完成支付方式选择的动作。</td></tr>
+              <tr><td>S07</td><td>灰色</td><td><code>Client</code> → <code>ACQP</code> 创建支付</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>前端把订单号、金额、币种、终端环境等信息发给你后台。</td></tr>
+              <tr><td>S08</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 发起支付</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_cashier" target="_blank" rel="noreferrer">pay (Cashier Payment)</a></td><td>这是线上 Cashier Payment 的核心服务端 API。</td></tr>
+              <tr><td>S09</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 返回支付受理结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_cashier" target="_blank" rel="noreferrer">pay (Cashier Payment)</a></td><td>通常返回 `paymentId` 与 `normalUrl` 或 `paymentData`，此时并不代表支付已最终成功。</td></tr>
+              <tr><td>S10</td><td>灰色</td><td><code>ACQP</code> → <code>Client</code> 返回 checkout 打开信息</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>你的前端只拿到拉起支付所需参数，不直接拿官方密钥或服务端凭证。</td></tr>
+              <tr><td>S11</td><td>蓝色</td><td><code>Client</code> → <code>Alipay+ Checkout / SDK</code> 打开支付页</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>这是客户端跳转或拉起 SDK 的动作，不是后台 API。</td></tr>
+              <tr><td>S12</td><td>灰色</td><td><code>User</code> → <code>Alipay+ Backend</code> 在 checkout 页选择钱包</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>用户在 Alipay+ checkout 页面选择具体钱包。</td></tr>
+              <tr><td>S13</td><td>灰色</td><td><code>Checkout</code> → <code>MPP Wallet</code> 钱包路由 / deep link / QR</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>这一步发生在官方 checkout 与钱包生态之间，但不是 Alipay+ 服务端 API。</td></tr>
+              <tr><td>S14</td><td>灰色</td><td><code>User</code> → <code>MPP Wallet</code> 确认支付并认证</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>用户在钱包里输入密码、做人脸或完成其他认证。</td></tr>
+              <tr><td>S15</td><td>灰色</td><td><code>MPP Wallet</code> → <code>Checkout</code> 返回钱包侧支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>钱包侧结果先回到 checkout / SDK 层，这一步也不是 Alipay+ 服务端 API。</td></tr>
+              <tr><td>S16</td><td>蓝色</td><td><code>Checkout</code> → <code>Alipay+ Backend</code> 回传最终支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>客户端层把最终支付确认交回官方后台。</td></tr>
+              <tr><td>S17</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 异步通知支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>这是支付最终态收敛的主路径。</td></tr>
+              <tr><td>S18</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 返回通知确认</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>你的后台完成验签、幂等和落库后，应答 `HTTP 200`。</td></tr>
+              <tr><td>S19</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 补偿查询</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>当 callback 没到、状态长期不确定时，用 inquiry 补查。</td></tr>
+              <tr><td>S20</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 返回支付查询结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>查询结果通常是 `S / F / U` 等最终或中间状态。</td></tr>
+              <tr><td>S21</td><td>灰色</td><td><code>Client</code> → <code>ACQP</code> 查询订单状态</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>前端回到结果页后，应查你自己的后台，不直接查官方。</td></tr>
+              <tr><td>S22</td><td>灰色</td><td><code>ACQP</code> → <code>Client</code> 返回最终订单状态</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>这是你前端展示成功、失败或处理中状态的直接依据。</td></tr>
+              <tr><td>S23</td><td>灰色</td><td><code>Client</code> → <code>User</code> 展示支付结果页</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>整个线上支付体验闭环在你的前端结果页完成。</td></tr>
+            </tbody>
+          </table>
+          <details>
+            <summary>图 1 源文件</summary>
+            <p><a href="./diagrams/payment-flow.puml">payment-flow.puml</a> / <a href="./diagrams/payment-flow.svg">payment-flow.svg</a></p>
+          </details>
+        </section>
+        <section class="section" id="zh-store-user">
+          <h2>UC-Store-1. 用户出示付款码，店铺扫描</h2>
+          <p>线下支付先分成两种主模式：`User-presented` 是“用户出示码，店铺扫描”；`Merchant-presented` 是“店铺展示码，用户扫描”。下面先展开 `User-presented`。</p>
+          <h3>触发画面与官方样例</h3>
+          <p>官方文档给了线下场景总览图，但没有把“钱包付款码页”做成可直接复用的按钮级截图。因此这里分成两层：先给官方场景图，再用通用示意图标出真正触发时序的动作。</p>
+          <div class="visual-grid two">
+            <figure class="diagram compact"><figcaption>官方样例：线下支付场景总览</figcaption><img src="./official-samples/instore-1.png" alt="official instore payment sample"><p class="visual-note">来源：<a href="https://docs.alipayplus.com/alipayplus/alipayplus/brand_guidelines_acq/brand_in_store_acq" target="_blank" rel="noreferrer">In-store Payment | Brand Guidelines</a></p></figure>
+            <figure class="diagram compact"><figcaption>通用触发示意：用户出示码，门店扫描</figcaption><img src="./diagrams/ui-upm-trigger.svg" alt="generic user presented trigger screens"><p class="visual-note">说明：这张图只用于解释触发动作和时序号，不代表官方钱包 UI。</p></figure>
+          </div>
+          <table>
+            <thead><tr><th>画面</th><th>动作</th><th>触发的序列号</th><th>作用</th></tr></thead>
+            <tbody>
+              <tr><td>钱包付款码页</td><td>打开付款码页面</td><td><code>S01-S06</code></td><td>钱包侧获取并展示付款码。此时你的系统还没有开始处理支付。</td></tr>
+              <tr><td>门店 POS 扫码页</td><td>点击扫描用户码 / 输入金额</td><td><code>S07-S10</code></td><td>门店第一次把用户码和订单金额送入你的 ACQP 支付链路。</td></tr>
+              <tr><td>门店收银结果页</td><td>确认完成收银</td><td><code>S22-S24</code></td><td>你的后台返回最终状态后，POS 和收银员才完成交易闭环。</td></tr>
+            </tbody>
+          </table>
+          <figure class="diagram"><figcaption>画面-时序联动图：User-presented</figcaption><img src="./diagrams/ui-sequence-upm-composite.png" alt="user presented screen to sequence linkage"><p class="visual-note">这张图强调：钱包侧先显示付款码，真正进入你方支付链路的是门店扫码和建单动作。门店/POS、后端和运营可以用同一张图对齐责任边界。</p></figure>
+          <figure class="diagram"><figcaption>线下支付模式总览</figcaption><img src="./diagrams/instore-usecase-map.svg" alt="instore use case"></figure>
+          <p>关键原则：用户付款码由钱包侧生成并展示；你的系统从“门店扫到用户码后发起支付”开始。</p>
+          <figure class="diagram"><figcaption>UC-1 时序图</figcaption><img src="./diagrams/upm-sequence.svg" alt="upm sequence"></figure>
+          <p>读图提示：颜色现在只表达“调用类型”。红线表示调用 Alipay+ 服务端 API，蓝线表示调用 Alipay+ 客户端能力，灰线表示非 Alipay API / SDK 的其它步骤。用户付款码先由钱包侧获取并展示，然后门店扫描后，你的 ACQP 后台才进入主支付链路。</p>
+          <p>表里的“官方依据”列同样不是说每一步都是 API。灰色步骤挂的是官方流程文档，用来证明该步骤在官方流程里存在。</p>
+          <table>
+            <thead><tr><th>序列号</th><th>线条颜色</th><th>跨系统调用</th><th>官方依据（API / 流程文档）</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>S01</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 打开付款码页面</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented product intro</a></td><td>用户先在钱包里进入付款码页，支付还没进入你方系统。</td></tr>
+              <tr><td>S02</td><td>灰色</td><td><code>Wallet</code> → <code>MPP Server</code> 请求付款码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>钱包 App 向钱包后台索取可展示的付款码。</td></tr>
+              <tr><td>S03</td><td>灰色</td><td><code>MPP Server</code> → <code>Alipay+ Backend</code> 获取付款码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>这是钱包生态与 Alipay+ 之间的取码动作，不是 ACQP 调用，也不是你要实现的 API。</td></tr>
+              <tr><td>S04</td><td>灰色</td><td><code>Alipay+ Backend</code> → <code>MPP Server</code> 返回付款码与有效期</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>钱包后台拿到付款码后准备回传给 App。</td></tr>
+              <tr><td>S05</td><td>灰色</td><td><code>MPP Server</code> → <code>Wallet</code> 返回付款码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>钱包 App 得到可以展示给门店扫描的码值。</td></tr>
+              <tr><td>S06</td><td>灰色</td><td><code>Wallet</code> → <code>Consumer</code> 展示二维码 / 条码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>用户码由钱包侧展示，不是门店或 ACQP 生成。</td></tr>
+              <tr><td>S07</td><td>灰色</td><td><code>Consumer</code> → <code>Cashier</code> 出示付款码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>门店收银员此时才开始与用户的付款码交互。</td></tr>
+              <tr><td>S08</td><td>灰色</td><td><code>Cashier</code> → <code>POS</code> 扫码并输入金额</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>金额和码值先进入你的门店端设备。</td></tr>
+              <tr><td>S09</td><td>灰色</td><td><code>POS</code> → <code>ACQP</code> 创建门店支付</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>这是门店系统进入你统一后台的起点。</td></tr>
+              <tr><td>S10</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 发起用户码扣款</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_unified/pay_user_presented_mode" target="_blank" rel="noreferrer">pay (User-presented Mode Payment)</a></td><td>这是 UPM 模式下 ACQP 的主支付调用。</td></tr>
+              <tr><td>S11</td><td>灰色</td><td><code>Alipay+ Backend</code> → <code>MPP Server</code> 路由支付请求</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>官方后台根据用户码解析出的身份，把支付请求路由到正确的钱包生态。这不是 ACQP 直接控制的 API。</td></tr>
+              <tr><td>S12</td><td>灰色</td><td><code>MPP Server</code> → <code>Wallet</code> 推送确认请求</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>如果钱包需要用户确认，会先把确认请求推到钱包 App。</td></tr>
+              <tr><td>S13</td><td>灰色</td><td><code>Wallet</code> → <code>Consumer</code> 展示确认页</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>用户在钱包中看到待支付订单与金额。</td></tr>
+              <tr><td>S14</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 确认 / 认证</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>用户完成密码、生物识别等确认动作。</td></tr>
+              <tr><td>S15</td><td>灰色</td><td><code>Wallet</code> → <code>MPP Server</code> 返回确认结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>钱包 App 把确认结果回传给钱包后台。</td></tr>
+              <tr><td>S16</td><td>灰色</td><td><code>MPP Server</code> → <code>Alipay+ Backend</code> 返回支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>钱包生态把最终确认结果送回官方后台。</td></tr>
+              <tr><td>S17</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 同步支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_unified/pay_user_presented_mode" target="_blank" rel="noreferrer">pay (User-presented Mode Payment)</a></td><td>这是支付主调用链路上的同步结果返回。</td></tr>
+              <tr><td>S18</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 异步通知最终状态</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>最终结果收敛仍以 callback 为主。</td></tr>
+              <tr><td>S19</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 返回通知确认</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>你的后台完成验签、幂等和状态落库后返回成功应答。</td></tr>
+              <tr><td>S20</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 补偿查询</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>当 callback 没到或状态长期不确定时补查。</td></tr>
+              <tr><td>S21</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 返回查询结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>补查结果可用于把订单从处理中推进到最终态。</td></tr>
+              <tr><td>S22</td><td>灰色</td><td><code>ACQP</code> → <code>POS</code> 返回支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>你的后台把最终支付结果返给门店端设备。</td></tr>
+              <tr><td>S23</td><td>灰色</td><td><code>POS</code> → <code>Cashier</code> 展示成功 / 失败 / 处理中</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>收银员依据门店终端展示结果继续处理交易。</td></tr>
+              <tr><td>S24</td><td>灰色</td><td><code>Cashier</code> → <code>Consumer</code> 完成收银</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>门店侧交易闭环到此结束。</td></tr>
+            </tbody>
+          </table>
+          <details>
+            <summary>UC-1 PlantUML 源码</summary>
+            <pre>@startuml
+title UC-1 User-presented Mode Payment - Merchant Scans Customer QR
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 12
+skinparam dpi 140
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam titleFontSize 15
+skinparam legendFontSize 10
+skinparam participantFontSize 11
+skinparam actorFontSize 11
+skinparam sequenceArrowFontSize 10
+skinparam ArrowColor #4A5568
+skinparam ParticipantBorderColor #5B6B82
+skinparam ActorBorderColor #5B6B82
+
+legend right
+|= Color |= System |
+|&lt;#FFF2CC&gt;| Consumer / Merchant |
+|&lt;#D4F1EA&gt;| Your POS / Scanner |
+|&lt;#CFE2FF&gt;| Your Backend / ACQP |
+|&lt;#FCE5CD&gt;| Alipay+ client-side assist |
+|&lt;#F4CCCC&gt;| Alipay+ backend |
+|&lt;#E1D5E7&gt;| MPP Wallet / MPP Server |
+----
+|&lt;#2F80ED&gt;| Blue arrows = Alipay+ SDK / checkout calls |
+|&lt;#C0392B&gt;| Red arrows = Alipay+ backend API calls |
+|&lt;#4A5568&gt;| Gray arrows = non-Alipay API / SDK steps |
+endlegend
+
+actor Consumer #FFF2CC
+actor "Store Cashier" as Cashier #FFF2CC
+participant "Your POS / Scanner" as POS #D4F1EA
+participant "Your Backend / ACQP" as ACQP #CFE2FF
+participant "Alipay+ Backend" as AP #F4CCCC
+participant "MPP Wallet App" as Wallet #E1D5E7
+participant "MPP Server" as MPPServer #E1D5E7
+
+autonumber "S00"
+
+Consumer -&gt; Wallet: Open wallet payment code page
+Wallet -&gt; MPPServer: Request payment code
+MPPServer -&gt; AP: getPaymentCode(...)
+AP --&gt; MPPServer: paymentCode / validity
+MPPServer --&gt; Wallet: Return payment code
+Wallet --&gt; Consumer: Display QR/bar code
+Consumer -&gt; Cashier: Present payment code
+Cashier -&gt; POS: Scan customer code and input amount
+POS -&gt; ACQP: Create in-store payment\n(codeValue, amount, merchant)
+ACQP -[#C0392B]&gt; AP: pay(user-presented mode)
+AP -&gt; MPPServer: Route payment request\nwith decoded customer identity
+alt Wallet requires confirmation
+  MPPServer -&gt; Wallet: Push payment confirmation
+  Wallet -&gt; Consumer: Show payment confirmation
+  Consumer -&gt; Wallet: Confirm / authenticate
+end
+Wallet --&gt; MPPServer: Confirmation result
+MPPServer --&gt; AP: Payment result
+AP -[#C0392B]--&gt; ACQP: Sync payment result
+AP -[#C0392B]&gt; ACQP: notifyPayment(final status)
+ACQP -[#C0392B]--&gt; AP: SUCCESS ack
+opt Callback missing or status still uncertain
+  ACQP -[#C0392B]&gt; AP: inquiryPayment(paymentRequestId or paymentId)
+  AP -[#C0392B]--&gt; ACQP: paymentResult S, F, or U
+end
+ACQP --&gt; POS: Payment result
+POS --&gt; Cashier: Show success / fail / pending
+Cashier --&gt; Consumer: Complete sale
+@enduml</pre>
+          </details>
+        </section>
+        <section class="section" id="zh-store-merchant">
+          <h2>UC-Store-2. 用户扫描店铺二维码并支付</h2>
+          <p>关键原则：merchant-presented 只表示“店铺展示二维码”，不表示“二维码一定由 Alipay+ 生成”。Entry Code 和 Private Order Code 由 ACQP 侧发码；Order Code 由 Alipay+ 生成后同步给门店展示。三条分支的共同起点是“店铺侧已经确定商户上下文并进入待支付状态”，但只有 <code>Order Code</code> 和 <code>Private Order Code</code> 必然在扫码前由 POS 先创建动态订单；<code>Entry Code</code> 的金额输入可以发生在扫码后的商户页。</p>
+          <h3>触发画面与官方样例</h3>
+          <p>官方文档对线下门店侧给了真实场景样例，但三种码型的触发点不完全一样。所以这里先放官方样例，再用一张通用示意图拆开 <code>Entry Code</code>、<code>Order Code</code>、<code>Private Order Code</code> 三个起点。</p>
+          <div class="visual-grid two">
+            <figure class="diagram compact"><figcaption>官方样例：门店侧支付场景</figcaption><img src="./official-samples/instore-2.png" alt="official merchant presented sample"><p class="visual-note">来源：<a href="https://docs.alipayplus.com/alipayplus/alipayplus/brand_guidelines_acq/brand_in_store_acq" target="_blank" rel="noreferrer">In-store Payment | Brand Guidelines</a></p></figure>
+            <figure class="diagram compact"><figcaption>通用触发示意：门店展示码，用户扫描</figcaption><img src="./diagrams/ui-mpm-trigger.svg" alt="generic merchant presented trigger screens"><p class="visual-note">说明：这张图只用于解释三种码型分别从哪个动作开始进入时序。</p></figure>
+          </div>
+          <table>
+            <thead><tr><th>分支</th><th>触发画面与动作</th><th>触发的序列号</th><th>作用</th></tr></thead>
+            <tbody>
+              <tr><td><code>Entry Code</code></td><td>用户扫描门店展示的静态码</td><td><code>S02-S09</code></td><td>用户先进入商户页，再由 ACQP 向 Alipay+ 发起支付。</td></tr>
+              <tr><td><code>Order Code</code></td><td>POS 点击生成动态码并展示给用户扫描</td><td><code>S10-S16</code></td><td>门店先建动态订单，再展示 Alipay+ 返回的动态码。</td></tr>
+              <tr><td><code>Private Order Code</code></td><td>POS 获取私有码并展示给用户扫描</td><td><code>S17-S23</code></td><td>二维码由 ACQP 发出，解码时也需要 ACQP 参与。</td></tr>
+              <tr><td>公共后段</td><td>用户在钱包确认支付</td><td><code>S24-S33</code></td><td>三条分支最后都收敛到通知、补查和门店收银完成。</td></tr>
+            </tbody>
+          </table>
+          <figure class="diagram"><figcaption>画面-时序联动图：Merchant-presented</figcaption><img src="./diagrams/ui-sequence-mpm-composite.png" alt="merchant presented screen to sequence linkage"><p class="visual-note">这张图把三种码型各自的起点动作和它们最终共享的确认/返回结果链路放到同一张图里，适合产品、POS、后端一起确认选型和实现分工。</p></figure>
+          <figure class="diagram"><figcaption>UC-2 时序图</figcaption><img src="./diagrams/mpm-sequence.svg" alt="mpm sequence"></figure>
+          <p>读图提示：颜色现在只表达“调用类型”。红线表示调用 Alipay+ 服务端 API，蓝线表示调用 Alipay+ 客户端能力，灰线表示非 Alipay API / SDK 的其它步骤。这张图有 3 条分支，所以不能只用一组统一序列号去硬解释全部流程。下面的表按 <code>Entry Code</code>、<code>Order Code</code>、<code>Private Order Code</code> 三个分支分别对齐图里的消息顺序。</p>
+          <p>灰色步骤如果挂官方链接，表示这些动作在官方集成流程页中有明确描述，并不表示它们本身是 API 调用。</p>
+          <table>
+            <thead><tr><th>序列号</th><th>线条颜色</th><th>跨系统调用</th><th>官方依据（API / 流程文档）</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>S01</td><td>灰色</td><td><code>Cashier</code> → <code>POS</code> 创建订单 / 输入金额</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>线下 merchant-presented 三个分支都从门店侧先创建订单开始。</td></tr>
+              <tr><td>S02</td><td>灰色</td><td><code>POS</code> → <code>Consumer</code> 展示 ACQP 静态 Entry Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>这是 Entry Code 分支，二维码由 ACQP 侧签发并由门店展示。</td></tr>
+              <tr><td>S03</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 扫描门店码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>用户用钱包扫描店铺展示的静态码。</td></tr>
+              <tr><td>S04</td><td>灰色</td><td><code>Wallet</code> → <code>ACQP</code> 打开码中携带的商户页 URL</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>钱包根据静态码中的 URL 进入 ACQP 提供的商户页。这不是 Alipay+ API。</td></tr>
+              <tr><td>S05</td><td>灰色</td><td><code>ACQP</code> → <code>Consumer</code> 渲染商户页 / 金额输入页</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>用户在这个页面确认要支付给哪个商户、付多少钱。</td></tr>
+              <tr><td>S06</td><td>灰色</td><td><code>Consumer</code> → <code>ACQP</code> 输入金额并确认</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>只有在用户输入金额并确认后，ACQP 才正式发起支付。</td></tr>
+            <tr><td>S07</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 发起 Entry Code 支付</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_entry_code" target="_blank" rel="noreferrer">pay (Entry Code)</a></td><td>这是 Entry Code 场景对应的支付请求。</td></tr>
+            <tr><td>S08</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 返回支付受理结果 / paymentUrl</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_entry_code" target="_blank" rel="noreferrer">pay (Entry Code)</a></td><td>返回确认页地址，供钱包继续进入确认流程。</td></tr>
+              <tr><td>S09</td><td>蓝色</td><td><code>ACQP</code> → <code>Wallet</code> 跳转到支付确认页</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>Entry Code 分支到这里把用户带入钱包确认页。</td></tr>
+              <tr><td>S10</td><td>灰色</td><td><code>POS</code> → <code>ACQP</code> 创建动态订单</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>这是 Order Code 分支的起点，门店先向后台申请一笔动态订单。</td></tr>
+              <tr><td>S11</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 请求生成 Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>只有这一支是由官方返回动态二维码内容。</td></tr>
+              <tr><td>S12</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 返回 Alipay+-issued order code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>后台收到的是订单码内容，不是最终支付结果。</td></tr>
+              <tr><td>S13</td><td>灰色</td><td><code>ACQP</code> → <code>POS</code> 同步动态订单二维码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>ACQP 把官方生成的动态码下发到门店端展示。</td></tr>
+              <tr><td>S14</td><td>灰色</td><td><code>POS</code> → <code>Consumer</code> 展示动态 Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>用户看到的是门店屏幕上的动态二维码。</td></tr>
+              <tr><td>S15</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 扫描动态码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>用户用钱包读取动态订单码。</td></tr>
+              <tr><td>S16</td><td>灰色</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> 解码 Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>钱包把动态码交给官方后台解码出订单信息。这一步属于流程动作，不是 ACQP 侧 API。</td></tr>
+              <tr><td>S17</td><td>灰色</td><td><code>POS</code> → <code>ACQP</code> 创建动态订单</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>这是 Private Order Code 分支的起点，这一支也要求 POS 先创建动态订单。</td></tr>
+              <tr><td>S18</td><td>灰色</td><td><code>ACQP</code> → <code>POS</code> 返回 ACQP 私有码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>这里的二维码是 ACQP 自己生成并返回给门店展示的。</td></tr>
+              <tr><td>S19</td><td>灰色</td><td><code>POS</code> → <code>Consumer</code> 展示 Private Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>门店展示的是 ACQP 私有码，不是官方 order code。</td></tr>
+              <tr><td>S20</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 扫描私有码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>用户用钱包扫描 ACQP 私有码。</td></tr>
+              <tr><td>S21</td><td>灰色</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> 提交私有码进行解码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>钱包先把扫码内容交给官方后台判断如何继续处理。这一步属于流程动作，不是 ACQP 侧 API。</td></tr>
+              <tr><td>S22</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 请求解码私有码</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_private_order_code" target="_blank" rel="noreferrer">userInitiatedPay</a></td><td>官方后台向 ACQP 请求订单与商户详情。</td></tr>
+              <tr><td>S23</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 返回商户 / 订单详情</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_private_order_code" target="_blank" rel="noreferrer">userInitiatedPay</a></td><td>Private Order Code 分支在这里把解码后的业务信息交回官方后台。</td></tr>
+              <tr><td>S24</td><td>灰色</td><td><code>Wallet</code> → <code>Consumer</code> 展示支付确认页</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>无论前面是哪种码型，确认页最终都在钱包中展示给用户。</td></tr>
+              <tr><td>S25</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 确认 / 认证</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>用户在钱包里完成密码或生物识别等确认动作。</td></tr>
+              <tr><td>S26</td><td>灰色</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> 返回支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>钱包侧确认结果回到官方后台。这不是 ACQP 直接调用的接口。</td></tr>
+              <tr><td>S27</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 异步通知支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>三种 merchant-presented 分支最终都通过 notifyPayment 收敛。</td></tr>
+              <tr><td>S28</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 返回通知确认</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>你的后台处理完通知后返回成功应答。</td></tr>
+              <tr><td>S29</td><td>红色</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 补偿查询</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>当通知缺失或状态不确定时，统一用 inquiryPayment 补查。</td></tr>
+              <tr><td>S30</td><td>红色</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 返回查询结果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>补查结果把订单推进到成功、失败或继续处理中状态。</td></tr>
+              <tr><td>S31</td><td>灰色</td><td><code>ACQP</code> → <code>POS</code> 返回支付结果</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>你的后台把最终状态返给门店终端。</td></tr>
+              <tr><td>S32</td><td>灰色</td><td><code>POS</code> → <code>Cashier</code> 展示成功 / 失败 / 处理中</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>收银员根据门店端结果决定是否完成交易或人工介入。</td></tr>
+              <tr><td>S33</td><td>灰色</td><td><code>Cashier</code> → <code>Consumer</code> 完成销售</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>线下 merchant-presented 收银闭环结束。</td></tr>
+            </tbody>
+          </table>
+          <details>
+            <summary>UC-2 源文件</summary>
+            <p><a href="./diagrams/mpm-sequence.puml">mpm-sequence.puml</a> / <a href="./diagrams/mpm-sequence.svg">mpm-sequence.svg</a></p>
+          </details>
+        </section>
+        <section class="section" id="zh-arch">
+          <h2>图 0. 整体系统构造图</h2>
+          <p>这张图只保留必要的跨系统主链路，并给关键连线加上 A01-A18 编号。它重点回答两件事：门店系统如何并入你现有平台；交易成功、对账、结算、商户打款之间的责任边界如何拆开。像签名、任务调度、内部记录这类支撑能力被折叠进平台边界，不再单独拉线制造视觉噪音。</p>
+          <figure class="diagram"><figcaption>图 0. 整体系统构造图</figcaption><img src="./diagrams/overall-system-architecture.svg" alt="overall architecture"></figure>
+          <table>
+            <thead><tr><th>编号</th><th>主路径</th><th>说明</th></tr></thead>
+            <tbody>
+              <tr><td>A01</td><td>消费者前端 → API Gateway</td><td>App、Web、结果页统一从一个公共入口创建支付、查状态。</td></tr>
+              <tr><td>A02-A04</td><td>门店 POS / ERP → Store Adapter → Unified Merchant API</td><td>门店系统不直接接 Alipay+，而是先正则化成你的内部接口。</td></tr>
+              <tr><td>A07-A10</td><td>你的后台 ↔ Alipay+ Payment APIs / 钱包</td><td>服务端对服务端调用 + 钱包侧确认支付。</td></tr>
+              <tr><td>A14-A18</td><td>对账 / 银行 / ACQP 结算账户 / 商户打款</td><td>这是资金链，不要和 callback 完成混为一谈。</td></tr>
+            </tbody>
+          </table>
+          <details>
+            <summary>图 0 PlantUML 源码摘录</summary>
+            <pre>@startuml
+title Overall System Architecture for Alipay+ ACQP Integration
+left to right direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 14
+skinparam linetype ortho
+skinparam nodesep 55
+skinparam ranksep 65
+skinparam defaultTextAlignment center
+skinparam packageStyle rectangle
+skinparam componentStyle rectangle
+skinparam ArrowColor #4A5568
+skinparam packageBorderColor #5B6B82
+skinparam componentBorderColor #5B6B82
+skinparam databaseBorderColor #5B6B82
+skinparam queueBorderColor #5B6B82
+...
+@enduml</pre>
+          </details>
+          <details>
+            <summary>图 0 完整源文件</summary>
+            <p><a href="./diagrams/overall-system-architecture.puml">overall-system-architecture.puml</a> / <a href="./diagrams/overall-system-architecture.svg">overall-system-architecture.svg</a></p>
+          </details>
+        </section>
+        <section class="section" id="zh-deploy">
+          <h2>图 0B. 推荐部署拓扑图</h2>
+          <p>这张图专门回答部署问题。它把客户端 / 门店网络、公共入口、私有服务、数据与密钥、Alipay+ 平台、财务银行区分开，避免把 callback、签名、数据库和门店接入堆在一层。</p>
+          <figure class="diagram"><figcaption>图 0B. 推荐部署拓扑图</figcaption><img src="./diagrams/deployment-topology.svg" alt="deployment topology"></figure>
+          <table>
+            <thead><tr><th>部署编号</th><th>区域</th><th>建议</th></tr></thead>
+            <tbody>
+              <tr><td>D01-D02</td><td>客户端 / 门店到公共入口</td><td>App、Web、POS 统一经过 CDN / WAF 或受控公网边界。</td></tr>
+              <tr><td>D04</td><td>callback 部署</td><td>为 Alipay+ callback 提供专门公网 endpoint，再由 worker 异步处理。</td></tr>
+              <tr><td>D06-D08</td><td>服务端访问 Alipay+</td><td>支付、退款、报备只能是后台到后台；私钥不能放在 App 或 POS。</td></tr>
+              <tr><td>D13-D16</td><td>数据与密钥区</td><td>订单、事件、总账 / 对账分库；签名密钥进 KMS。</td></tr>
+            </tbody>
+          </table>
+          <details>
+            <summary>图 0B 源文件</summary>
+            <p><a href="./diagrams/deployment-topology.puml">deployment-topology.puml</a> / <a href="./diagrams/deployment-topology.svg">deployment-topology.svg</a></p>
+          </details>
+          <h3>门店侧系统如何整合到你现有系统</h3>
+          <table>
+            <thead><tr><th>门店侧系统</th><th>推荐接入点</th><th>应该发给你后台的内容</th><th>不要怎么做</th></tr></thead>
+            <tbody>
+              <tr><td>Store POS / Cash Register</td><td>Store Adapter / POS Middleware → Merchant API</td><td>订单号、金额、币种、终端号、扫码值、请求发码或查状态。</td><td>不要让 POS 直接签名调用 Alipay+ API。</td></tr>
+              <tr><td>Scanner / QR Display</td><td>由 POS 控制；显示内容可来自 ACQP 发码，也可来自 Alipay+ Order Code</td><td>只负责扫什么码 / 显示什么码。</td><td>不要把支付成功判断放在设备本身。</td></tr>
+              <tr><td>Store Order / ERP</td><td>对接 Store Adapter</td><td>商品、应付金额、门店号、打印 / 关单指令。</td><td>不要把 ERP 暴露成 Alipay+ 回调接收端。</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="section" id="zh-funds">
+          <h2>如何算钱</h2>
+          <p>官方文档明确覆盖 ACQP 与 Alipay+ 之间的支付金额、手续费、对账报表、结算报表和结算到账事实，见 <a href="https://docs.alipayplus.com/alipayplus/alipayplus/reconcile_acq/how_to_reconcile" target="_blank" rel="noreferrer">Perform reconciliation</a> 与 <a href="https://docs.alipayplus.com/alipayplus/alipayplus/reconcile_acq/settlement" target="_blank" rel="noreferrer">Settlement Report</a>。但官方没有替你定义“你最终给商户打多少钱”的合同结算公式，这部分必须由你自己的 Merchant Settlement Engine 计算。</p>
+          <figure class="diagram"><figcaption>资金、对账与结算链路</figcaption><img src="./diagrams/funds-and-reconciliation-flow.svg" alt="funds flow"></figure>
+        </section>
+      </div>
+      <div class="lang-pane" data-lang-pane="en">
+        <div class="file-list">
+          <a href="./diagrams/overall-system-architecture.svg">overall-system-architecture.svg</a>
+          <a href="./diagrams/deployment-topology.svg">deployment-topology.svg</a>
+          <a href="./diagrams/funds-and-reconciliation-flow.svg">funds-and-reconciliation-flow.svg</a>
+        </div>
+        <section class="section" id="en-purpose"><h2>Report purpose</h2><p>This report is not just an API memo and not just a collection of diagrams. It is an integration report intended for design review and implementation planning. The target audience includes product owners, architects, backend engineers, mobile engineers, store-system owners, and finance or operations teams that need to understand settlement and reconciliation boundaries.</p><p>The perspective is strictly <strong>ACQP-side integration</strong>: how your frontend, store systems, and backend connect to Alipay+. The report therefore explains payment-mode selection, system responsibilities, result convergence, and the financial boundary between payment success, reconciliation, settlement, and merchant payout.</p></section>
+        <section class="section" id="en-terms"><h2>Terminology and scope</h2><p>These terms often mean different things across different teams and systems. The table below fixes the meaning used by this report before any diagram or API mapping is read.</p><table><thead><tr><th>Term</th><th>Meaning in this report</th><th>Why it matters</th></tr></thead><tbody><tr><td><code>ACQP perspective</code></td><td>The report is written from your acquiring-platform side, not from the wallet's internal implementation side.</td><td>When the report says "should do", the default subject is your platform.</td></tr><tr><td><code>Online Payment</code></td><td>In this report it specifically means the official overview product line <code>Online Payment / Cashier Payment</code>, not every possible online payment scenario.</td><td>It avoids mixing the official product name with a generic phrase.</td></tr><tr><td><code>Cashier Payment</code></td><td>The online flow that starts from the merchant app or website cashier and continues into Alipay+ checkout or SDK.</td><td>It is different from in-store QR payment even if a QR appears in some web cases.</td></tr><tr><td><code>In-store Payment</code></td><td>The official offline payment family, split into <code>User-presented</code> and <code>Merchant-presented</code>.</td><td>The online/offline split must be fixed before discussing offline variants.</td></tr><tr><td><code>User-presented</code></td><td>The customer shows a payment code and the store scans it. The code is generated by the wallet side.</td><td>This prevents the wrong assumption that ACQP or the store generates the customer code.</td></tr><tr><td><code>Merchant-presented</code></td><td>The store shows a QR and the customer scans it. It does not mean the QR is always generated by Alipay+.</td><td>This is the most common source of confusion across Entry Code, Order Code, and Private Order Code.</td></tr><tr><td><code>MPP / wallet ecosystem</code></td><td>The external wallet app and its backend ecosystem used by the customer.</td><td>When the diagram shows gray lines, they are non-Alipay API / SDK steps, including wallet-side interactions and your own internal actions.</td></tr><tr><td><code>Line color</code></td><td>Red lines mean Alipay+ server-side API calls; blue lines mean Alipay+ client-side capabilities such as checkout or SDK; gray lines mean all other non-Alipay API / SDK steps.</td><td>Gray does not mean "unsupported". A gray row can still cite an official workflow page when the official docs describe that step.</td></tr><tr><td><code>callback</code></td><td>Alipay+ asynchronous notification back to your backend.</td><td>It is the main operational result path, but not the same as settlement completion.</td></tr><tr><td><code>reconciliation</code></td><td>Financial verification using transaction, fee, settlement, and bank facts.</td><td>It should not be mixed with frontend payment success.</td></tr><tr><td><code>settlement</code></td><td>Funds settlement between Alipay+ and ACQP.</td><td>It is not the same thing as merchant payout.</td></tr><tr><td><code>merchant payout</code></td><td>Your own payout to the merchant or store under your contract rules.</td><td>That logic is owned by your settlement engine, not defined by Alipay+.</td></tr></tbody></table></section>
+        <section class="section" id="en-questions"><h2>What this report answers</h2><table><thead><tr><th>Question</th><th>How the report answers it</th></tr></thead><tbody><tr><td>Which payment mode should be integrated?</td><td>The report separates online Cashier Payment, offline User-presented, and offline Merchant-presented before going into details.</td></tr><tr><td>What should the mobile app, store systems, and backend each do?</td><td>Each use case is followed by a sequence diagram, system-boundary explanation, and official API mapping.</td></tr><tr><td>How do store-side systems fit into the existing platform?</td><td>Figure 0 and Figure 0B explain system construction, deployment layering, and store integration boundaries.</td></tr><tr><td>How is money calculated, and when is a transaction really final?</td><td>The funds and reconciliation section separates callback success, reconciliation truth, settlement completion, and merchant payout readiness.</td></tr></tbody></table><p>The recommended reading order is: purpose and payment modes first, then the individual use cases, then the overall architecture and deployment topology, and finally the funds, reconciliation, and shared backend capabilities.</p></section>
+        <section class="section" id="en-overview"><h2>How this report maps to the official overview</h2><p>The official entry is <a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a>. This report follows the same product split: online Cashier Payment, in-store User-presented, in-store Merchant-presented, and business operations such as Registration and Reconciliation.</p></section>
+        <section class="section" id="en-nav"><h2>Reading navigation</h2><p>If you want to read one payment mode from business scenario down to implementation, follow the sections below in order instead of jumping between diagrams and API tables.</p><ul><li><a href="#en-online">Online Cashier Payment</a>: start with the online cashier scenario, main sequence, and API set.</li><li><a href="#en-store-user">Offline User-presented</a>: then read the customer-code-shown and store-scan path.</li><li><a href="#en-store-merchant">Offline Merchant-presented</a>: then read the three store-code branches.</li><li><a href="#en-arch">Figure 0. Overall system architecture</a>: understand how store systems are folded into your existing platform.</li><li><a href="#en-deploy">Figure 0B. Recommended deployment topology</a>: understand deployment boundaries, callback entry, and key placement.</li><li><a href="#en-funds">How money is calculated</a>: confirm when a transaction is financially final.</li></ul></section>
+        <section class="section" id="en-online">
+          <h2>UC-Online-1. Online Cashier Payment integration</h2>
+          <p>Online mode starts from the merchant app or website cashier, not from a store QR.</p>
+          <p>This report shows <code>consultPayment</code> in the main path because the official docs provide it as the method-discovery API for wallets, promotions, and logos. It fits the implementation pattern where your own backend controls method rendering. If your cashier UI already has preconfigured payment methods, <code>S02-S05</code> can be simplified, but the backend duties around <code>pay / notifyPayment / inquiryPayment</code> remain.</p>
+          <h3>Trigger screens and official samples</h3>
+          <p>Read the screens first, then the sequence. Where the official UX docs provide real page samples, those are shown first. The extra trigger diagram is only a generic aid for mapping buttons to sequence IDs.</p>
+          <div class="visual-grid two">
+            <figure class="diagram compact"><figcaption>Official sample: merchant cashier page</figcaption><img src="./official-samples/ux-web-2.png" alt="official cashier page sample"><p class="visual-note">Source: <a href="https://docs.alipayplus.com/alipayplus/alipayplus/ux/ux_web" target="_blank" rel="noreferrer">Cashier Payment - Web | UX Design Guidelines</a></p></figure>
+            <figure class="diagram compact"><figcaption>Official sample: confirm/result page</figcaption><img src="./official-samples/ux-web-1.png" alt="official result page sample"><p class="visual-note">Source: <a href="https://docs.alipayplus.com/alipayplus/alipayplus/ux/ux_web" target="_blank" rel="noreferrer">Cashier Payment - Web | UX Design Guidelines</a></p></figure>
+          </div>
+          <figure class="diagram"><figcaption>Generic trigger aid: which button starts the online main flow</figcaption><img src="./diagrams/ui-online-cashier-trigger.svg" alt="generic online trigger screens"></figure>
+          <table>
+            <thead><tr><th>Screen</th><th>Action</th><th>Triggered sequence IDs</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td>Merchant cashier</td><td>Tap a wallet-payment entry</td><td><code>S06-S10</code></td><td>The client asks your backend to create the payment and then enters the hosted checkout / SDK path.</td></tr>
+              <tr><td>Hosted checkout / SDK page</td><td>Confirm and continue</td><td><code>S11-S18</code></td><td>The user proceeds through wallet selection, confirmation, and result return.</td></tr>
+              <tr><td>Merchant result page</td><td>Refresh status / complete order</td><td><code>S21-S23</code></td><td>The frontend confirms final status with your own backend before closing the order.</td></tr>
+            </tbody>
+          </table>
+          <figure class="diagram"><figcaption>Screen-to-sequence linkage: Online Cashier Payment</figcaption><img src="./diagrams/ui-sequence-online-composite.png" alt="online screen to sequence linkage"><p class="visual-note">This figure links trigger screens, major sequence groups, and the returned result page in one place. PMs can read entry and return behavior first, while frontend and backend teams can map implementation ownership.</p></figure>
+          <figure class="diagram"><figcaption>Online Cashier Payment use case</figcaption><img src="./diagrams/online-usecase-map.svg" alt="online use case"></figure>
+          <figure class="diagram"><figcaption>Figure 1. Online Cashier Payment main flow</figcaption><img src="./diagrams/payment-flow.svg" alt="cashier flow"></figure>
+          <p>Reading aid: colors now indicate call type only. Red lines are Alipay+ server-side API calls, blue lines are Alipay+ client-side capabilities such as checkout or SDK, and gray lines are all other steps that are not Alipay API / SDK calls.</p><p>Gray rows may still contain official links. In those cases the link is a workflow reference, not an Alipay API endpoint.</p>
+          <table>
+            <thead><tr><th>Sequence</th><th>Line color</th><th>Cross-system call</th><th>Official reference (API / workflow doc)</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td>S01</td><td>Gray</td><td><code>User</code> → <code>Client</code> place order</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The business order is first created in your own cashier experience.</td></tr>
+              <tr><td>S02</td><td>Gray</td><td><code>Client</code> → <code>ACQP</code> request payment-method options</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>Your frontend asks your backend for method-rendering data.</td></tr>
+              <tr><td>S03</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> consult payment methods</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/consult_payment" target="_blank" rel="noreferrer">consultPayment</a></td><td>Server-to-server consultation for wallets, promotions, logos, and related metadata.</td></tr>
+              <tr><td>S04</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> return payment-method data</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/consult_payment" target="_blank" rel="noreferrer">consultPayment</a></td><td>This response is renderable metadata, not a final payment result.</td></tr>
+              <tr><td>S05</td><td>Gray</td><td><code>ACQP</code> → <code>Client</code> return renderable method data</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>Your frontend renders the Alipay+ entry from your own backend response.</td></tr>
+              <tr><td>S06</td><td>Gray</td><td><code>User</code> → <code>Client</code> select Alipay+</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The user chooses the Alipay+ method on your cashier page.</td></tr>
+              <tr><td>S07</td><td>Gray</td><td><code>Client</code> → <code>ACQP</code> create payment</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>Your frontend sends order, amount, currency, and terminal environment to your backend.</td></tr>
+              <tr><td>S08</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> initiate payment</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_cashier" target="_blank" rel="noreferrer">pay (Cashier Payment)</a></td><td>This is the core server-side API call for Cashier Payment.</td></tr>
+              <tr><td>S09</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> return acceptance result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_cashier" target="_blank" rel="noreferrer">pay (Cashier Payment)</a></td><td>Typically returns a <code>paymentId</code> and checkout opening data, not final success.</td></tr>
+              <tr><td>S10</td><td>Gray</td><td><code>ACQP</code> → <code>Client</code> return checkout payload</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>Your frontend receives only what is needed to open checkout.</td></tr>
+              <tr><td>S11</td><td>Blue</td><td><code>Client</code> → <code>Alipay+ Checkout / SDK</code> open payment page</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>This is a client-side redirect or SDK handoff, not a backend API call.</td></tr>
+              <tr><td>S12</td><td>Gray</td><td><code>User</code> → <code>Alipay+ Backend</code> choose wallet on checkout</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The user chooses which wallet to use on the checkout page.</td></tr>
+              <tr><td>S13</td><td>Gray</td><td><code>Checkout</code> → <code>MPP Wallet</code> ウォレットへのルーティング / deep link / QR</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>This handoff happens between checkout and the wallet ecosystem.</td></tr>
+              <tr><td>S14</td><td>Gray</td><td><code>User</code> → <code>MPP Wallet</code> confirm and authenticate payment</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The user completes password, biometric, or other wallet authentication.</td></tr>
+              <tr><td>S15</td><td>Gray</td><td><code>MPP Wallet</code> → <code>Checkout</code> return wallet-side result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>The wallet result first returns to the checkout / SDK layer.</td></tr>
+              <tr><td>S16</td><td>Blue</td><td><code>Checkout</code> → <code>Alipay+ Backend</code> report final result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>The client-side layer reports the final wallet outcome to the official backend.</td></tr>
+              <tr><td>S17</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> asynchronous payment notification</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>This is the main path for final-state convergence.</td></tr>
+              <tr><td>S18</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> acknowledge callback</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>Your backend should verify, deduplicate, persist, and return a success acknowledgement.</td></tr>
+              <tr><td>S19</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> compensation inquiry</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>Use inquiry when callback is missing or the state remains uncertain.</td></tr>
+              <tr><td>S20</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> return inquiry result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>The result typically returns final or intermediate states such as <code>S / F / U</code>.</td></tr>
+              <tr><td>S21</td><td>Gray</td><td><code>Client</code> → <code>ACQP</code> query order status</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>After returning to the result page, the frontend should query your backend, not Alipay+.</td></tr>
+              <tr><td>S22</td><td>Gray</td><td><code>ACQP</code> → <code>Client</code> return final order status</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>This is the direct basis for success, failure, or pending UI states.</td></tr>
+              <tr><td>S23</td><td>Gray</td><td><code>Client</code> → <code>User</code> show payment result page</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The online payment experience closes on your own result page.</td></tr>
+            </tbody>
+          </table>
+          <details><summary>Figure 1 source files</summary><p><a href="./diagrams/payment-flow.puml">payment-flow.puml</a> / <a href="./diagrams/payment-flow.svg">payment-flow.svg</a></p></details>
+        </section>
+        <section class="section" id="en-store-user">
+          <h2>UC-Store-1. Customer presents a payment code and the store scans it</h2>
+          <p>Offline payment first splits into two main modes: <code>User-presented</code> means the customer shows a code and the store scans it; <code>Merchant-presented</code> means the store shows a code and the customer scans it. This section expands the user-presented path first.</p>
+          <h3>Trigger screens and official samples</h3>
+          <p>The official docs provide scenario visuals for in-store payment, but not a button-level wallet-code screen that can be reused directly. So this section combines one official sample with one generic trigger aid.</p>
+          <div class="visual-grid two">
+            <figure class="diagram compact"><figcaption>Official sample: in-store scenario overview</figcaption><img src="./official-samples/instore-1.png" alt="official instore sample"><p class="visual-note">Source: <a href="https://docs.alipayplus.com/alipayplus/alipayplus/brand_guidelines_acq/brand_in_store_acq" target="_blank" rel="noreferrer">In-store Payment | Brand Guidelines</a></p></figure>
+            <figure class="diagram compact"><figcaption>Generic trigger aid: customer shows code, store scans</figcaption><img src="./diagrams/ui-upm-trigger.svg" alt="generic user presented trigger screens"><p class="visual-note">This image is illustrative only. It maps actions to sequence IDs and does not claim to be an official wallet UI.</p></figure>
+          </div>
+          <table>
+            <thead><tr><th>Screen</th><th>Action</th><th>Triggered sequence IDs</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td>Wallet code screen</td><td>Open the payment-code page</td><td><code>S01-S06</code></td><td>The wallet side obtains and displays the customer code before your platform is involved.</td></tr>
+              <tr><td>Store POS scan screen</td><td>Scan the customer code / input amount</td><td><code>S07-S10</code></td><td>This is the first moment the store sends the customer code and order amount into your ACQP flow.</td></tr>
+              <tr><td>Store result screen</td><td>Complete checkout</td><td><code>S22-S24</code></td><td>The cashier finishes the sale only after your backend returns or confirms the final result.</td></tr>
+            </tbody>
+          </table>
+          <figure class="diagram"><figcaption>Screen-to-sequence linkage: User-presented</figcaption><img src="./diagrams/ui-sequence-upm-composite.png" alt="user presented screen to sequence linkage"><p class="visual-note">This figure shows that the wallet displays the code first, while the store scan is the actual trigger into your ACQP path. Store/POS, backend, and operations can use it to align responsibilities.</p></figure>
+          <figure class="diagram"><figcaption>In-store payment mode map</figcaption><img src="./diagrams/instore-usecase-map.svg" alt="instore use case"></figure>
+          <p>The wallet generates and displays the customer code. Your system starts after the store scans that code.</p>
+          <figure class="diagram"><figcaption>UC-1 sequence diagram</figcaption><img src="./diagrams/upm-sequence.svg" alt="upm sequence"></figure>
+          <p>Reading aid: colors now indicate call type only. Red lines are Alipay+ server-side API calls, blue lines are Alipay+ client-side capabilities, and gray lines are all other steps. Gray rows can still cite official workflow pages when the step is documented there.</p>
+          <table>
+            <thead><tr><th>Sequence</th><th>Line color</th><th>Cross-system call</th><th>Official reference (API / workflow doc)</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td>S01</td><td>Gray</td><td><code>Consumer</code> → <code>Wallet</code> open payment-code page</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented product intro</a></td><td>The customer first opens the wallet payment-code page. Your system is not involved yet.</td></tr>
+              <tr><td>S02</td><td>Gray</td><td><code>Wallet</code> → <code>MPP Server</code> request payment code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The wallet app asks the wallet backend for a scannable customer code.</td></tr>
+              <tr><td>S03</td><td>Gray</td><td><code>MPP Server</code> → <code>Alipay+ Backend</code> get payment code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>This is a wallet-ecosystem action, not an ACQP-owned API call.</td></tr>
+              <tr><td>S04</td><td>Gray</td><td><code>Alipay+ Backend</code> → <code>MPP Server</code> return code and validity</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The wallet backend receives the customer code and its validity window.</td></tr>
+              <tr><td>S05</td><td>Gray</td><td><code>MPP Server</code> → <code>Wallet</code> return payment code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The wallet app receives the code that will be shown to the cashier.</td></tr>
+              <tr><td>S06</td><td>Gray</td><td><code>Wallet</code> → <code>Consumer</code> display QR / barcode</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The customer code is displayed by the wallet side, not by ACQP or the store.</td></tr>
+              <tr><td>S07</td><td>Gray</td><td><code>Consumer</code> → <code>Cashier</code> present payment code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The store side begins interacting with the customer code at this point.</td></tr>
+              <tr><td>S08</td><td>Gray</td><td><code>Cashier</code> → <code>POS</code> scan code and input amount</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The scanned value and amount first enter the store device.</td></tr>
+              <tr><td>S09</td><td>Gray</td><td><code>POS</code> → <code>ACQP</code> create in-store payment</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>This is the point where the store system enters your unified backend.</td></tr>
+              <tr><td>S10</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> initiate user-code debit</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_unified/pay_user_presented_mode" target="_blank" rel="noreferrer">pay (User-presented Mode Payment)</a></td><td>This is the main ACQP-side payment call for UPM.</td></tr>
+              <tr><td>S11</td><td>Gray</td><td><code>Alipay+ Backend</code> → <code>MPP Server</code> route payment request</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The official backend routes the payment request to the correct wallet ecosystem.</td></tr>
+              <tr><td>S12</td><td>Gray</td><td><code>MPP Server</code> → <code>Wallet</code> push confirmation request</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>If confirmation is required, the wallet app receives a confirmation request.</td></tr>
+              <tr><td>S13</td><td>Gray</td><td><code>Wallet</code> → <code>Consumer</code> show confirmation page</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The user sees the order and amount inside the wallet.</td></tr>
+              <tr><td>S14</td><td>Gray</td><td><code>Consumer</code> → <code>Wallet</code> confirm / authenticate</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The user completes password, biometric, or other wallet authentication.</td></tr>
+              <tr><td>S15</td><td>Gray</td><td><code>Wallet</code> → <code>MPP Server</code> return confirmation result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The wallet app returns the confirmation result to its backend.</td></tr>
+              <tr><td>S16</td><td>Gray</td><td><code>MPP Server</code> → <code>Alipay+ Backend</code> return payment result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>The wallet ecosystem returns the final payment result to Alipay+.</td></tr>
+              <tr><td>S17</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> synchronous payment result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_unified/pay_user_presented_mode" target="_blank" rel="noreferrer">pay (User-presented Mode Payment)</a></td><td>This is the synchronous result on the main payment call chain.</td></tr>
+              <tr><td>S18</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> async final notification</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>Callback remains the primary path for final-state convergence.</td></tr>
+              <tr><td>S19</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> acknowledge notification</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>Your backend verifies, deduplicates, persists, and then acknowledges the callback.</td></tr>
+              <tr><td>S20</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> compensation inquiry</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>Use inquiry when callback is missing or the state remains uncertain.</td></tr>
+              <tr><td>S21</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> return inquiry result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>The inquiry result can advance the order from pending to a final state.</td></tr>
+              <tr><td>S22</td><td>Gray</td><td><code>ACQP</code> → <code>POS</code> return payment result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>Your backend returns the final payment result to the store terminal.</td></tr>
+              <tr><td>S23</td><td>Gray</td><td><code>POS</code> → <code>Cashier</code> show success / fail / pending</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The cashier acts based on the result shown by the POS.</td></tr>
+              <tr><td>S24</td><td>Gray</td><td><code>Cashier</code> → <code>Consumer</code> complete sale</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>The in-store cashier flow closes here.</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="section" id="en-store-merchant">
+          <h2>UC-Store-2. Customer scans the store QR code and pays</h2>
+          <p>Merchant-presented means the store displays the QR, not that Alipay+ always generates it. Entry Code and Private Order Code are ACQP-side codes; Order Code is generated by Alipay+. All three branches share the same merchant-presented context, but only <code>Order Code</code> and <code>Private Order Code</code> necessarily require the POS to create a dynamic order before the scan. In <code>Entry Code</code>, amount entry can happen on the merchant page after scanning.</p>
+          <h3>Trigger screens and official samples</h3>
+          <p>The official docs show real store-side examples, but the three branches still need one additional aid to explain exactly where each sequence starts. The second image below is that generic trigger aid.</p>
+          <div class="visual-grid two">
+            <figure class="diagram compact"><figcaption>Official sample: store-side payment scenario</figcaption><img src="./official-samples/instore-2.png" alt="official merchant presented sample"><p class="visual-note">Source: <a href="https://docs.alipayplus.com/alipayplus/alipayplus/brand_guidelines_acq/brand_in_store_acq" target="_blank" rel="noreferrer">In-store Payment | Brand Guidelines</a></p></figure>
+            <figure class="diagram compact"><figcaption>Generic trigger aid: store shows code, customer scans</figcaption><img src="./diagrams/ui-mpm-trigger.svg" alt="generic merchant presented trigger screens"><p class="visual-note">This image is illustrative only. It separates Entry Code, Order Code, and Private Order Code start points.</p></figure>
+          </div>
+          <table>
+            <thead><tr><th>Branch</th><th>Trigger screen and action</th><th>Triggered sequence IDs</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td><code>Entry Code</code></td><td>The customer scans the static store code</td><td><code>S02-S09</code></td><td>The user first enters a merchant page and provides amount or order confirmation, then ACQP sends the payment request to Alipay+.</td></tr>
+              <tr><td><code>Order Code</code></td><td>The POS generates a dynamic code and shows it for scanning</td><td><code>S10-S16</code></td><td>The store creates a dynamic order first, then shows the Alipay+-issued code.</td></tr>
+              <tr><td><code>Private Order Code</code></td><td>The POS gets a private code and shows it for scanning</td><td><code>S17-S23</code></td><td>The QR is issued by ACQP and also requires ACQP during decode.</td></tr>
+              <tr><td>Common ending</td><td>The user confirms payment inside the wallet</td><td><code>S24-S33</code></td><td>All three branches converge into notify, inquiry, and final store completion.</td></tr>
+            </tbody>
+          </table>
+          <figure class="diagram"><figcaption>Screen-to-sequence linkage: Merchant-presented</figcaption><img src="./diagrams/ui-sequence-mpm-composite.png" alt="merchant presented screen to sequence linkage"><p class="visual-note">This figure aligns each branch trigger with the shared confirmation and result path so product, POS, and backend teams can agree on branch selection and implementation ownership.</p></figure>
+          <figure class="diagram"><figcaption>UC-2 sequence diagram</figcaption><img src="./diagrams/mpm-sequence.svg" alt="mpm sequence"></figure>
+          <p>Reading aid: this diagram has three branches. The API mapping must therefore be explained per branch instead of forcing one flat sequence onto the whole flow.</p>
+          <table>
+            <thead><tr><th>Sequence</th><th>Line color</th><th>Cross-system call</th><th>Official reference (API / workflow doc)</th><th>Meaning</th></tr></thead>
+            <tbody>
+              <tr><td>S01</td><td>Gray</td><td><code>Cashier</code> → <code>POS</code> prepare the store-side payment context</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>All three merchant-presented branches start from a store payment context, but only some branches create a dynamic order before scanning.</td></tr>
+              <tr><td>S02</td><td>Gray</td><td><code>POS</code> → <code>Consumer</code> show ACQP static Entry Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>This is the Entry Code branch. The QR is issued by ACQP and displayed by the store.</td></tr>
+              <tr><td>S03</td><td>Gray</td><td><code>Consumer</code> → <code>Wallet</code> scan merchant QR</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>The customer scans the static store QR with the wallet.</td></tr>
+              <tr><td>S04</td><td>Gray</td><td><code>Wallet</code> → <code>ACQP</code> open merchant-page URL from QR</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>The wallet opens the 加盟店ページ URL contained in the static QR.</td></tr>
+              <tr><td>S05</td><td>Gray</td><td><code>ACQP</code> → <code>Consumer</code> render merchant page / amount-entry page</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>The customer sees the merchant page and confirms who is being paid.</td></tr>
+              <tr><td>S06</td><td>Gray</td><td><code>Consumer</code> → <code>ACQP</code> enter amount and confirm</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>Only after amount entry and confirmation does ACQP initiate the actual payment.</td></tr>
+              <tr><td>S07</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> initiate Entry Code payment</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_entry_code" target="_blank" rel="noreferrer">pay (Entry Code)</a></td><td>This is the payment request for the Entry Code scenario.</td></tr>
+              <tr><td>S08</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> return acceptance result / paymentUrl</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_entry_code" target="_blank" rel="noreferrer">pay (Entry Code)</a></td><td>The response contains the page or payload needed for wallet confirmation.</td></tr>
+              <tr><td>S09</td><td>Blue</td><td><code>ACQP</code> → <code>Wallet</code> redirect to confirmation page</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>The Entry Code branch now brings the user into the wallet confirmation flow.</td></tr>
+              <tr><td>S10</td><td>Gray</td><td><code>POS</code> → <code>ACQP</code> create dynamic order</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>This is the start of the Order Code branch.</td></tr>
+              <tr><td>S11</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> request Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>Only this branch receives the dynamic QR payload from Alipay+.</td></tr>
+              <tr><td>S12</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> return Alipay+-issued Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>The response is order-code content, not a final payment result.</td></tr>
+              <tr><td>S13</td><td>Gray</td><td><code>ACQP</code> → <code>POS</code> sync dynamic QR to store</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>ACQP sends the official dynamic QR to the store terminal for display.</td></tr>
+              <tr><td>S14</td><td>Gray</td><td><code>POS</code> → <code>Consumer</code> show dynamic Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>The customer sees the dynamic QR on the store device.</td></tr>
+              <tr><td>S15</td><td>Gray</td><td><code>Consumer</code> → <code>Wallet</code> scan dynamic QR</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>The wallet reads the dynamic merchant QR.</td></tr>
+              <tr><td>S16</td><td>Gray</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> decode Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>The wallet submits the scanned dynamic code to Alipay+ for decoding.</td></tr>
+              <tr><td>S17</td><td>Gray</td><td><code>POS</code> → <code>ACQP</code> create dynamic order</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>This is the start of the Private Order Code branch, which also requires a store-side dynamic order before scanning.</td></tr>
+              <tr><td>S18</td><td>Gray</td><td><code>ACQP</code> → <code>POS</code> return ACQP private QR</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>The QR itself is generated by ACQP and returned to the store terminal.</td></tr>
+              <tr><td>S19</td><td>Gray</td><td><code>POS</code> → <code>Consumer</code> show Private Order Code</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>The store shows an ACQP-issued private QR, not an official Order Code.</td></tr>
+              <tr><td>S20</td><td>Gray</td><td><code>Consumer</code> → <code>Wallet</code> scan private QR</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>The customer scans the ACQP-issued private QR.</td></tr>
+              <tr><td>S21</td><td>Gray</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> submit private QR for decode</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>The wallet first sends the scanned private QR to Alipay+.</td></tr>
+              <tr><td>S22</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> request private-code decode</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_private_order_code" target="_blank" rel="noreferrer">userInitiatedPay</a></td><td>Alipay+ asks ACQP for the merchant and order information behind the private QR.</td></tr>
+              <tr><td>S23</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> return merchant / order details</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_private_order_code" target="_blank" rel="noreferrer">userInitiatedPay</a></td><td>The Private Order Code branch supplies the decoded business details here.</td></tr>
+              <tr><td>S24</td><td>Gray</td><td><code>Wallet</code> → <code>Consumer</code> show payment confirmation page</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>Regardless of branch, the confirmation page is ultimately shown in the wallet.</td></tr>
+              <tr><td>S25</td><td>Gray</td><td><code>Consumer</code> → <code>Wallet</code> confirm / authenticate</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>The customer completes password or biometric confirmation in the wallet.</td></tr>
+              <tr><td>S26</td><td>Gray</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> return payment result</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>The wallet-side result goes back to the official backend.</td></tr>
+              <tr><td>S27</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> asynchronous payment notification</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>All merchant-presented branches converge through <code>notifyPayment</code>.</td></tr>
+              <tr><td>S28</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> acknowledge notification</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>Your backend returns a success acknowledgement after verification and persistence.</td></tr>
+              <tr><td>S29</td><td>Red</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> compensation inquiry</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>Use inquiry when notification is missing or the state remains uncertain.</td></tr>
+              <tr><td>S30</td><td>Red</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> return inquiry result</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>The inquiry result can move the order to success, failure, or continued pending.</td></tr>
+              <tr><td>S31</td><td>Gray</td><td><code>ACQP</code> → <code>POS</code> return payment result</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>Your backend returns the final result to the store terminal.</td></tr>
+              <tr><td>S32</td><td>Gray</td><td><code>POS</code> → <code>Cashier</code> show success / fail / pending</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>The cashier acts on the result shown by the store device.</td></tr>
+              <tr><td>S33</td><td>Gray</td><td><code>Cashier</code> → <code>Consumer</code> complete sale</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>The merchant-presented in-store sale closes here.</td></tr>
+            </tbody>
+          </table>
+        </section>
+        <section class="section" id="en-arch"><h2>Figure 0. Overall system architecture</h2><p>Figure 0 keeps only the necessary cross-system paths and labels them A01-A18. It answers how store-side systems are folded into your platform and how payment success, reconciliation, settlement, and merchant payout must be separated. Internal support capabilities such as signature handling, jobs, and internal records are intentionally folded into the platform boundary instead of being drawn as separate noisy lines.</p><figure class="diagram"><figcaption>Figure 0. Overall system architecture</figcaption><img src="./diagrams/overall-system-architecture.svg" alt="overall architecture"></figure><table><thead><tr><th>ID</th><th>Path</th><th>Meaning</th></tr></thead><tbody><tr><td>A01</td><td>Consumer channels → API Gateway</td><td>App, Web, and result pages enter through one public create-payment and status-query entry.</td></tr><tr><td>A02-A04</td><td>Store POS / ERP → Store Adapter → Unified Merchant API</td><td>Store systems do not integrate with Alipay+ directly.</td></tr><tr><td>A07-A10</td><td>Your backend ↔ Alipay+ Payment APIs / wallet</td><td>Server-side APIs plus wallet-side confirmation.</td></tr><tr><td>A14-A18</td><td>Reconciliation / bank / settlement / payout</td><td>This is the funds chain and must not be confused with callback success.</td></tr></tbody></table><details><summary>Figure 0 source files</summary><p><a href="./diagrams/overall-system-architecture.puml">overall-system-architecture.puml</a> / <a href="./diagrams/overall-system-architecture.svg">overall-system-architecture.svg</a></p></details></section>
+        <section class="section" id="en-deploy"><h2>Figure 0B. Recommended deployment topology</h2><p>This figure answers the deployment question directly. It separates client/store network, public edge, private services, data and security, Alipay+ platform, and finance/bank zones.</p><figure class="diagram"><figcaption>Figure 0B. Recommended deployment topology</figcaption><img src="./diagrams/deployment-topology.svg" alt="deployment topology"></figure><table><thead><tr><th>Deploy ID</th><th>Zone</th><th>Recommendation</th></tr></thead><tbody><tr><td>D01-D02</td><td>Client/store to public edge</td><td>Enter through a controlled edge such as CDN / WAF.</td></tr><tr><td>D04</td><td>Callback deployment</td><td>Use a dedicated public callback endpoint and hand off to internal workers.</td></tr><tr><td>D06-D08</td><td>Server access to Alipay+</td><td>Never ship server APIs or keys to client apps or store devices.</td></tr><tr><td>D13-D16</td><td>Data and security zone</td><td>Separate order, event, and reconciliation storage; keep keys in KMS.</td></tr></tbody></table><details><summary>Figure 0B source files</summary><p><a href="./diagrams/deployment-topology.puml">deployment-topology.puml</a> / <a href="./diagrams/deployment-topology.svg">deployment-topology.svg</a></p></details></section>
+        <section class="section" id="en-funds"><h2>How money is calculated</h2><p>The official docs define payment amounts, fees, reconciliation files, settlement reports, and ACQP-facing settlement facts. They do not define your final merchant payout formula. That remains your own contract-based settlement logic.</p><figure class="diagram"><figcaption>Funds and reconciliation flow</figcaption><img src="./diagrams/funds-and-reconciliation-flow.svg" alt="funds flow"></figure><table><thead><tr><th>Layer</th><th>Scope</th><th>Meaning</th></tr></thead><tbody><tr><td>Officially defined layer</td><td>paymentAmount, settlementAmount, Fee Report, Settlement Report</td><td>Official ACQP-to-Alipay+ financial facts.</td></tr><tr><td>Your internal settlement layer</td><td>merchant gross, platform fee, tax, merchant net</td><td>Your own merchant payout engine.</td></tr><tr><td>Rule</td><td>callback success ≠ settlement complete ≠ payout ready</td><td>Reconciliation and bank facts must confirm each boundary.</td></tr></tbody></table></section>
+      </div>
+      <div class="lang-pane" data-lang-pane="ja">
+        <div class="file-list">
+          <a href="./diagrams/overall-system-architecture.svg">overall-system-architecture.svg</a>
+          <a href="./diagrams/deployment-topology.svg">deployment-topology.svg</a>
+          <a href="./diagrams/funds-and-reconciliation-flow.svg">funds-and-reconciliation-flow.svg</a>
+        </div>
+        <section class="section"><h2>レポートの目的</h2><p>このレポートは単なる API メモでも、図の寄せ集めでもありません。設計レビューと実装計画のための統合レポートです。対象読者は、プロダクト担当、アーキテクト、バックエンドエンジニア、モバイルエンジニア、店舗システム責任者、そして精算・照合境界を確認したい財務 / 運用担当です。</p><p>視点は一貫して <strong>ACQP 側統合</strong> です。つまり、自社フロントエンド、店舗システム、バックエンドが Alipay+ とどう接続されるかを説明します。そのため本レポートは、どの製品モードを接続すべきか、各システム層の責任は何か、結果をどう収束させるか、そして「支払成功」「照合完了」「資金決済完了」「加盟店へ入金可能」の境界がどう違うかを順に説明します。</p></section>
+        <section class="section"><h2>用語と口径</h2><p>これらの用語は、チームやシステムによって意味がぶれやすいものです。図や API 対応を読む前に、本レポートでの意味を固定します。</p><table><thead><tr><th>用語</th><th>本レポートでの意味</th><th>先に固定する理由</th></tr></thead><tbody><tr><td><code>ACQP 視点</code></td><td>ウォレット側の内部実装ではなく、自社のアクワイアリング基盤側からシステムと API を説明する視点です。</td><td>「何をすべきか」の主語が自社システムであることを明確にします。</td></tr><tr><td><code>Online Payment</code></td><td>本レポートでは、公式 overview の <code>Online Payment / Cashier Payment</code> を指します。</td><td>一般的な「オンライン決済」と混同しないためです。</td></tr><tr><td><code>Cashier Payment</code></td><td>加盟店 App / Web のレジ画面から始まり、Alipay+ checkout / SDK へ進むオンライン支払です。</td><td>店頭 QR 決済とは別物です。</td></tr><tr><td><code>In-store Payment</code></td><td>公式の店頭決済カテゴリで、<code>User-presented</code> と <code>Merchant-presented</code> に分かれます。</td><td>まずオンライン / オフラインを分け、その後でオフライン内部を分けるためです。</td></tr><tr><td><code>User-presented</code></td><td>顧客が支払コードを提示し、店舗が読み取る方式です。コードはウォレット側が生成します。</td><td>顧客コードを ACQP や店舗が生成するという誤解を防ぎます。</td></tr><tr><td><code>Merchant-presented</code></td><td>店舗が QR を表示し、顧客が読む方式です。常に Alipay+ が QR を生成する意味ではありません。</td><td>Entry Code / Order Code / Private Order Code の違いを読む前提になります。</td></tr><tr><td><code>MPP / wallet ecosystem</code></td><td>顧客が実際に使う外部ウォレットアプリとそのバックエンドです。</td><td>灰線は Alipay API / SDK 呼び出し以外の手順であり、ウォレット側協調や自社内部処理もここに含まれます。</td></tr><tr><td><code>線の色</code></td><td>赤線は Alipay+ サーバー API、青線は Alipay+ の checkout / SDK などのクライアント能力、灰線はそれ以外の非 Alipay API / SDK 手順です。</td><td>灰色は「公式根拠がない」という意味ではありません。灰色行にリンクがある場合、それは API ではなく公式フロー文書への根拠です。</td></tr><tr><td><code>callback</code></td><td>Alipay+ が自社バックエンドに返す非同期通知です。</td><td>運用上の結果収束であり、精算完了とは別です。</td></tr><tr><td><code>reconciliation</code></td><td>取引、手数料、精算、銀行事実に基づく財務照合です。</td><td>フロントの支払成功表示とは別の財務口径であると分かります。</td></tr><tr><td><code>settlement</code></td><td>Alipay+ と ACQP の間の資金精算完了です。</td><td>加盟店入金と同義ではありません。</td></tr><tr><td><code>merchant payout</code></td><td>自社契約ルールに基づく加盟店 / 店舗への入金です。</td><td>これは Alipay+ が定義するのではなく、自社精算ロジックが定義する領域です。</td></tr></tbody></table></section>
+        <section class="section"><h2>このレポートが答えること</h2><table><thead><tr><th>問い</th><th>本レポートでの答え方</th></tr></thead><tbody><tr><td>どの支払モードを接続すべきか</td><td>オンライン Cashier Payment、オフライン User-presented、オフライン Merchant-presented を最初に分けて説明します。</td></tr><tr><td>モバイル、店舗システム、バックエンドはそれぞれ何をするべきか</td><td>各 Use Case の直後に時系列図、システム境界説明、公式 API 対応を置いています。</td></tr><tr><td>店舗システムを既存プラットフォームにどう取り込むか</td><td>図 0 と図 0B でシステム構成、配置分層、店舗統合境界を説明します。</td></tr><tr><td>お金をどう計算し、いつ本当に確定とみなすか</td><td>資金・照合章で「支払成功」「照合上の真実」「資金決済完了」「加盟店へ入金可能」を分けて説明します。</td></tr></tbody></table><p>推奨読順は、まず目的と製品モード、その後に各 Use Case、続いて全体構成とデプロイ、最後に資金・照合・共有バックエンド機能です。</p></section>
+        <section class="section"><h2>公式 overview との対応</h2><p>公式入口は <a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a> です。本レポートは同じ製品区分に従います。オンラインは Cashier Payment、オフラインは User-presented と Merchant-presented、業務運用は Registration と Reconciliation に対応します。</p></section>
+        <section class="section"><h2>UC-Online-1. オンライン Cashier Payment 統合</h2><p>オンライン支払の起点は加盟店 App / Web のレジ画面であり、店舗 QR ではありません。</p><p>本レポートでは <code>consultPayment</code> を主経路に含めています。これは公式文書が、利用可能なウォレット、プロモーション、ロゴなどの表示情報を取得する手段としてこの API を提供しているためです。自社バックエンドが支払方法表示を統制する実装ではこの形が分かりやすく、すでにレジ UI に支払方法が固定されている場合は <code>S02-S05</code> を簡略化できます。ただし、その場合でも <code>pay / notifyPayment / inquiryPayment</code> のバックエンド責務は変わりません。</p><h3>起点画面と公式サンプル</h3><p>まず「どの画面で、どの操作が時系列を起動するか」を見てから時系列図を読む構成にしています。公式 UX 文書に実画面サンプルがある箇所はそれを使い、足りない部分だけ汎用図で補っています。</p><div class="visual-grid two"><figure class="diagram compact"><figcaption>公式サンプル：加盟店のレジ画面</figcaption><img src="./official-samples/ux-web-2.png" alt="official cashier page sample"><p class="visual-note">出典：<a href="https://docs.alipayplus.com/alipayplus/alipayplus/ux/ux_web" target="_blank" rel="noreferrer">Cashier Payment - Web | UX Design Guidelines</a></p></figure><figure class="diagram compact"><figcaption>公式サンプル：確認 / 結果画面</figcaption><img src="./official-samples/ux-web-1.png" alt="official result page sample"><p class="visual-note">出典：<a href="https://docs.alipayplus.com/alipayplus/alipayplus/ux/ux_web" target="_blank" rel="noreferrer">Cashier Payment - Web | UX Design Guidelines</a></p></figure></div><figure class="diagram"><figcaption>汎用トリガー図：どのボタンがオンライン主経路を起動するか</figcaption><img src="./diagrams/ui-online-cashier-trigger.svg" alt="generic online trigger screens"></figure><table><thead><tr><th>画面</th><th>操作</th><th>起動する順序番号</th><th>意味</th></tr></thead><tbody><tr><td>加盟店レジ画面</td><td>ウォレット支払入口を押す</td><td><code>S06-S10</code></td><td>自社フロントエンドが自社バックエンドに決済作成を依頼し、公式 checkout / SDK 経路へ入ります。</td></tr><tr><td>公式 checkout / SDK 画面</td><td>確認して続行</td><td><code>S11-S18</code></td><td>ウォレット選択、確認、結果返却の段階へ進みます。</td></tr><tr><td>加盟店結果画面</td><td>状態更新 / 注文完了</td><td><code>S21-S23</code></td><td>フロントエンドは自社バックエンドに最終状態を確認してから注文を閉じます。</td></tr></tbody></table><figure class="diagram"><figcaption>画面-時系列連動図：オンライン Cashier Payment</figcaption><img src="./diagrams/ui-sequence-online-composite.png" alt="online screen to sequence linkage"><p class="visual-note">この図は、どの画面操作がどの時系列区間を起動し、戻り結果がどの画面へ反映されるかを一枚で示します。PM は入口と戻り導線、フロントエンドは画面遷移、バックエンドは実装責任を確認できます。</p></figure><figure class="diagram"><figcaption>オンライン Cashier Payment use case</figcaption><img src="./diagrams/online-usecase-map.svg" alt="online use case"></figure><figure class="diagram"><figcaption>図 1. オンライン Cashier Payment 主経路</figcaption><img src="./diagrams/payment-flow.svg" alt="cashier flow"></figure><p>読図補助：色は呼び出し種別だけを表します。赤線は Alipay+ サーバー API、青線は Alipay+ の checkout / SDK などのクライアント能力、灰線はそれ以外の手順です。</p><p>灰色行にリンクがある場合、それは API ではなく公式フロー文書への根拠です。</p><table><thead><tr><th>順序</th><th>線の色</th><th>システム間呼び出し</th><th>公式根拠（API / フロー文書）</th><th>意味</th></tr></thead><tbody><tr><td>S01</td><td>灰色</td><td><code>User</code> → <code>Client</code> 注文を作成</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>最初に自社 App / Web のレジ画面で業務注文が作られます。</td></tr><tr><td>S02</td><td>灰色</td><td><code>Client</code> → <code>ACQP</code> 支払方法候補を要求</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>フロントエンドが自社バックエンドに表示用の支払方法情報を取りに行く内部呼び出しです。</td></tr><tr><td>S03</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 支払方法を照会</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/consult_payment" target="_blank" rel="noreferrer">consultPayment</a></td><td>利用可能なウォレット、プロモーション、ロゴなどの表示メタデータをサーバー間で取得します。</td></tr><tr><td>S04</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 支払方法データを返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/consult_payment" target="_blank" rel="noreferrer">consultPayment</a></td><td>返るのは表示用メタデータであり、最終的な支払結果ではありません。</td></tr><tr><td>S05</td><td>灰色</td><td><code>ACQP</code> → <code>Client</code> 表示用 method データを返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>フロントエンドは自社バックエンドの返却を使って Alipay+ 入口を描画します。</td></tr><tr><td>S06</td><td>灰色</td><td><code>User</code> → <code>Client</code> Alipay+ を選択</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>ユーザーが自社レジ画面で Alipay+ 支払方法を選びます。</td></tr><tr><td>S07</td><td>灰色</td><td><code>Client</code> → <code>ACQP</code> 決済を作成</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>注文番号、金額、通貨、端末環境などを自社バックエンドに渡します。</td></tr><tr><td>S08</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 決済を開始</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_cashier" target="_blank" rel="noreferrer">pay (Cashier Payment)</a></td><td>Cashier Payment の中核となるサーバー API 呼び出しです。</td></tr><tr><td>S09</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 受理結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_cashier" target="_blank" rel="noreferrer">pay (Cashier Payment)</a></td><td>通常は <code>paymentId</code> と checkout 起動情報が返り、この時点では最終成功ではありません。</td></tr><tr><td>S10</td><td>灰色</td><td><code>ACQP</code> → <code>Client</code> checkout 起動情報を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>フロントエンドには checkout を開くための payload だけを返します。</td></tr><tr><td>S11</td><td>青</td><td><code>Client</code> → <code>Alipay+ Checkout / SDK</code> 支払ページを開く</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>これはクライアント側の redirect / SDK 引き継ぎであり、バックエンド API ではありません。</td></tr><tr><td>S12</td><td>灰色</td><td><code>User</code> → <code>Alipay+ Backend</code> checkout 上でウォレットを選択</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>ユーザーが checkout 画面で具体的なウォレットを選びます。</td></tr><tr><td>S13</td><td>灰色</td><td><code>Checkout</code> → <code>MPP Wallet</code> ウォレットへのルーティング / deep link / QR</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>この引き継ぎは checkout と ウォレット側経路の間で発生します。</td></tr><tr><td>S14</td><td>灰色</td><td><code>User</code> → <code>MPP Wallet</code> 支払確認と認証</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>ユーザーはウォレット内で password、biometric などの認証を行います。</td></tr><tr><td>S15</td><td>灰色</td><td><code>MPP Wallet</code> → <code>Checkout</code> ウォレット側結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>ウォレットの結果は最初に checkout / SDK 層へ戻ります。</td></tr><tr><td>S16</td><td>青</td><td><code>Checkout</code> → <code>Alipay+ Backend</code> 最終結果を返送</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">SDK / checkout workflow</a></td><td>クライアント側の最終結果が公式バックエンドに渡されます。</td></tr><tr><td>S17</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 非同期決済通知</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>最終状態を収束させる主経路は非同期通知です。</td></tr><tr><td>S18</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 通知確認応答</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>バックエンドは検証、重複排除、永続化の後に成功応答を返します。</td></tr><tr><td>S19</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 補償照会</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>非同期通知が欠落したり状態が不確実なときに inquiry を使います。</td></tr><tr><td>S20</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 照会結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>返るのは <code>S / F / U</code> などの最終または中間状態です。</td></tr><tr><td>S21</td><td>灰色</td><td><code>Client</code> → <code>ACQP</code> 注文状態を照会</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>結果画面へ戻ったフロントエンドは Alipay+ ではなく自社バックエンドを照会すべきです。</td></tr><tr><td>S22</td><td>灰色</td><td><code>ACQP</code> → <code>Client</code> 最終注文状態を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>成功、失敗、処理中の UI はこの返却に基づいて表示されます。</td></tr><tr><td>S23</td><td>灰色</td><td><code>Client</code> → <code>User</code> 支払結果ページを表示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_cashier_acq_unified/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>オンライン支払体験の閉環は自社フロントエンドの結果ページで完了します。</td></tr></tbody></table><details><summary>図 1 のソースファイル</summary><p><a href="./diagrams/payment-flow.puml">payment-flow.puml</a> / <a href="./diagrams/payment-flow.svg">payment-flow.svg</a></p></details></section>
+        <section class="section"><h2>UC-Store-1. 顧客が支払コードを提示し、店舗がスキャンする</h2><p>オフライン決済は最初に 2 つの主モードへ分かれます。<code>User-presented</code> は「顧客がコードを提示し、店舗が読む」方式で、<code>Merchant-presented</code> は「店舗がコードを表示し、顧客が読む」方式です。ここではまず User-presented を展開します。</p><h3>起点画面と公式サンプル</h3><p>公式文書には店頭シナリオの実例図がありますが、wallet の支払コード画面をそのまま使える形では提示していません。そのため、この章では公式サンプル図と汎用トリガー図を並べています。</p><div class="visual-grid two"><figure class="diagram compact"><figcaption>公式サンプル：店頭決済シナリオ</figcaption><img src="./official-samples/instore-1.png" alt="official instore sample"><p class="visual-note">出典：<a href="https://docs.alipayplus.com/alipayplus/alipayplus/brand_guidelines_acq/brand_in_store_acq" target="_blank" rel="noreferrer">In-store Payment | Brand Guidelines</a></p></figure><figure class="diagram compact"><figcaption>汎用トリガー図：顧客がコードを提示し、店舗が読む</figcaption><img src="./diagrams/ui-upm-trigger.svg" alt="generic user presented trigger screens"><p class="visual-note">この図はトリガー操作と順序番号を対応付けるための説明用であり、公式 wallet UI を表すものではありません。</p></figure></div><table><thead><tr><th>画面</th><th>操作</th><th>起動する順序番号</th><th>意味</th></tr></thead><tbody><tr><td>wallet のコード画面</td><td>支払コード画面を開く</td><td><code>S01-S06</code></td><td>ウォレット側がコードを取得して表示します。この段階では自社プラットフォームはまだ関与しません。</td></tr><tr><td>店舗 POS スキャン画面</td><td>顧客コードを読み取り、金額を入力する</td><td><code>S07-S10</code></td><td>ここで初めて顧客コードと金額が自社 ACQP 経路へ入ります。</td></tr><tr><td>店舗結果画面</td><td>会計完了を確定する</td><td><code>S22-S24</code></td><td>自社 バックエンド が最終結果を返してから、店舗は販売を閉じます。</td></tr></tbody></table><figure class="diagram"><figcaption>画面-時系列連動図：User-presented</figcaption><img src="./diagrams/ui-sequence-upm-composite.png" alt="user presented screen to sequence linkage"><p class="visual-note">ウォレット側のコード表示と、店舗スキャン後に自社 ACQP 経路へ入る点を一枚で対応付けています。店舗/POS、バックエンド、運用が同じ図で責任分担を確認できます。</p></figure><figure class="diagram"><figcaption>オフライン決済モード全体図</figcaption><img src="./diagrams/instore-usecase-map.svg" alt="instore use case"></figure><p>重要原則：顧客コードは ウォレット側が生成して表示します。自社システムは店舗が顧客コードを読み取った後から始まります。</p><figure class="diagram"><figcaption>UC-1 時系列図</figcaption><img src="./diagrams/upm-sequence.svg" alt="upm sequence"></figure><p>読図補助：色は呼び出し種別だけを表します。赤線は Alipay+ サーバー API、青線は Alipay+ クライアント能力、灰線はそれ以外の手順です。灰色行に公式リンクがある場合、それは API ではなく公式フロー記述への根拠です。</p><table><thead><tr><th>順序</th><th>線の色</th><th>システム間呼び出し</th><th>公式根拠（API / フロー文書）</th><th>意味</th></tr></thead><tbody><tr><td>S01</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 支払コード画面を開く</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented product intro</a></td><td>顧客がまず wallet の支払コード画面を開きます。自社システムはまだ関与しません。</td></tr><tr><td>S02</td><td>灰色</td><td><code>Wallet</code> → <code>MPP Server</code> 支払コードを要求</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>wallet app がバックエンドに表示用の顧客コードを要求します。</td></tr><tr><td>S03</td><td>灰色</td><td><code>MPP Server</code> → <code>Alipay+ Backend</code> 支払コードを取得</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>これは ウォレット側協調の動きであり、ACQP 所有 API ではありません。</td></tr><tr><td>S04</td><td>灰色</td><td><code>Alipay+ Backend</code> → <code>MPP Server</code> コードと有効期限を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>wallet バックエンド が顧客コードと有効期限を受け取ります。</td></tr><tr><td>S05</td><td>灰色</td><td><code>MPP Server</code> → <code>Wallet</code> 支払コードを返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>wallet app が店頭に見せるコードを受け取ります。</td></tr><tr><td>S06</td><td>灰色</td><td><code>Wallet</code> → <code>Consumer</code> QR / barcode を表示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>顧客コードを表示するのは ウォレット側であり、ACQP や店舗ではありません。</td></tr><tr><td>S07</td><td>灰色</td><td><code>Consumer</code> → <code>Cashier</code> 支払コードを提示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>ここで初めて店舗側が顧客コードと接触します。</td></tr><tr><td>S08</td><td>灰色</td><td><code>Cashier</code> → <code>POS</code> コードを読み取り金額を入力</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>読み取った値と金額はまず店舗端末へ入ります。</td></tr><tr><td>S09</td><td>灰色</td><td><code>POS</code> → <code>ACQP</code> 店頭決済を作成</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>ここが店舗システムから自社統合バックエンドへ入る境界です。</td></tr><tr><td>S10</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 顧客コード課金を開始</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_unified/pay_user_presented_mode" target="_blank" rel="noreferrer">pay (User-presented Mode Payment)</a></td><td>UPM における ACQP 側の主決済呼び出しです。</td></tr><tr><td>S11</td><td>灰色</td><td><code>Alipay+ Backend</code> → <code>MPP Server</code> 支払要求をルーティング</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>公式バックエンドが顧客コードから識別した ウォレット側経路へ要求を渡します。</td></tr><tr><td>S12</td><td>灰色</td><td><code>MPP Server</code> → <code>Wallet</code> 確認要求を push</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>確認が必要な場合、wallet app に確認要求が届きます。</td></tr><tr><td>S13</td><td>灰色</td><td><code>Wallet</code> → <code>Consumer</code> 確認画面を表示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>ユーザーはウォレット内で注文内容と金額を確認します。</td></tr><tr><td>S14</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 確認 / 認証</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>password、biometric などの wallet 認証を完了します。</td></tr><tr><td>S15</td><td>灰色</td><td><code>Wallet</code> → <code>MPP Server</code> 確認結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>wallet app がバックエンドに確認結果を返します。</td></tr><tr><td>S16</td><td>灰色</td><td><code>MPP Server</code> → <code>Alipay+ Backend</code> 支払結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/product_intro_acq/product_upm_acq" target="_blank" rel="noreferrer">User-presented workflow</a></td><td>ウォレット側の最終結果が Alipay+ に戻ります。</td></tr><tr><td>S17</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 同期支払結果</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_unified/pay_user_presented_mode" target="_blank" rel="noreferrer">pay (User-presented Mode Payment)</a></td><td>主決済 API の同期応答として結果が返ります。</td></tr><tr><td>S18</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 非同期最終通知</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>最終状態の収束は非同期通知が主経路です。</td></tr><tr><td>S19</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 通知確認応答</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>検証、重複排除、永続化の後に成功応答を返します。</td></tr><tr><td>S20</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 補償照会</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>非同期通知の欠落や長時間不確実な状態のときに inquiry を使います。</td></tr><tr><td>S21</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 照会結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>照会結果で order を pending から最終状態へ進めます。</td></tr><tr><td>S22</td><td>灰色</td><td><code>ACQP</code> → <code>POS</code> 支払結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>自社バックエンドが店舗端末へ最終状態を返します。</td></tr><tr><td>S23</td><td>灰色</td><td><code>POS</code> → <code>Cashier</code> 成功 / 失敗 / 処理中を表示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>レジ担当は店舗端末の表示を見て後続対応を判断します。</td></tr><tr><td>S24</td><td>灰色</td><td><code>Cashier</code> → <code>Consumer</code> 会計を完了</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_user_mode_acq/accept_payment" target="_blank" rel="noreferrer">Accept a payment</a></td><td>店頭の user-presented 会計フローはここで閉じます。</td></tr></tbody></table></section>
+        <section class="section"><h2>UC-Store-2. 顧客が店舗 QR をスキャンして支払う</h2><p>重要原則：merchant-presented は「店舗が QR を表示する」という意味であり、「QR が必ず Alipay+ 生成である」ことを意味しません。Entry Code と Private Order Code は ACQP 側発行、Order Code は Alipay+ 発行です。三つの分岐の共通点は「店舗側が支払コンテキストに入っている」ことですが、スキャン前に POS が動的注文を作るのは <code>Order Code</code> と <code>Private Order Code</code> であり、<code>Entry Code</code> では金額入力がスキャン後の加盟店ページで行われることがあります。</p><h3>起点画面と公式サンプル</h3><p>公式文書には店頭側の実例画面がありますが、三つの分岐は起点が異なります。そのため、公式サンプルに加えて、<code>Entry Code</code>、<code>Order Code</code>、<code>Private Order Code</code> の起点だけを整理する汎用図を置いています。</p><div class="visual-grid two"><figure class="diagram compact"><figcaption>公式サンプル：店舗側支払シナリオ</figcaption><img src="./official-samples/instore-2.png" alt="official merchant presented sample"><p class="visual-note">出典：<a href="https://docs.alipayplus.com/alipayplus/alipayplus/brand_guidelines_acq/brand_in_store_acq" target="_blank" rel="noreferrer">In-store Payment | Brand Guidelines</a></p></figure><figure class="diagram compact"><figcaption>汎用トリガー図：店舗がコードを表示し、顧客が読む</figcaption><img src="./diagrams/ui-mpm-trigger.svg" alt="generic merchant presented trigger screens"><p class="visual-note">この図は三つの分岐の開始点を説明するための補助図です。</p></figure></div><table><thead><tr><th>分岐</th><th>起点画面と操作</th><th>起動する順序番号</th><th>意味</th></tr></thead><tbody><tr><td><code>Entry Code</code></td><td>顧客が店舗の静的コードを読む</td><td><code>S02-S09</code></td><td>顧客は加盟店ページに入り、金額入力または注文確認の後で ACQP が Alipay+ へ支払要求を送ります。</td></tr><tr><td><code>Order Code</code></td><td>POS が動的コードを生成して表示する</td><td><code>S10-S16</code></td><td>店舗が先に動的注文を作成し、Alipay+ が返したコードを表示します。</td></tr><tr><td><code>Private Order Code</code></td><td>POS が私有码を取得して表示する</td><td><code>S17-S23</code></td><td>コードは ACQP 発行であり、decode にも ACQP が参加します。</td></tr><tr><td>共通後段</td><td>ウォレット内で支払確認を行う</td><td><code>S24-S33</code></td><td>三つの分岐は最後に notify、inquiry、店頭会計完了へ収束します。</td></tr></tbody></table><figure class="diagram"><figcaption>画面-時系列連動図：Merchant-presented</figcaption><img src="./diagrams/ui-sequence-mpm-composite.png" alt="merchant presented screen to sequence linkage"><p class="visual-note">三つの分岐の起点画面と、共通の確認 / 結果収束区間を同じ図にまとめています。プロダクト、POS、バックエンドが選型と実装境界を合わせるための図です。</p></figure><figure class="diagram"><figcaption>UC-2 時系列図</figcaption><img src="./diagrams/mpm-sequence.svg" alt="mpm sequence"></figure><p>読図補助：色は呼び出し種別だけを表します。赤線は Alipay+ サーバー API、青線は Alipay+ クライアント能力、灰線はそれ以外の手順です。この図には 3 つの分岐があるため、<code>Entry Code</code>、<code>Order Code</code>、<code>Private Order Code</code> の順に個別に読みます。</p><table><thead><tr><th>順序</th><th>線の色</th><th>システム間呼び出し</th><th>公式根拠（API / フロー文書）</th><th>意味</th></tr></thead><tbody><tr><td>S01</td><td>灰色</td><td><code>Cashier</code> → <code>POS</code> 支払コンテキストを準備</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>merchant-presented の三つの分岐はすべて店頭の支払コンテキストから始まりますが、スキャン前に動的注文を作るかどうかは分岐によって異なります。</td></tr><tr><td>S02</td><td>灰色</td><td><code>POS</code> → <code>Consumer</code> ACQP 静的 Entry Code を表示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>Entry Code 分岐では ACQP が発行した静的 QR を店舗が表示します。</td></tr><tr><td>S03</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 店舗コードをスキャン</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>顧客はウォレットで店舗に掲示された静的コードを読み取ります。</td></tr><tr><td>S04</td><td>灰色</td><td><code>Wallet</code> → <code>ACQP</code> コード内の加盟店ページ URL を開く</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>ウォレットは静的コード中の URL を使って ACQP の加盟店ページに入ります。</td></tr><tr><td>S05</td><td>灰色</td><td><code>ACQP</code> → <code>Consumer</code> 加盟店ページ / 金額入力画面を表示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>顧客はどの加盟店にいくら支払うかをこの画面で確認します。</td></tr><tr><td>S06</td><td>灰色</td><td><code>Consumer</code> → <code>ACQP</code> 金額を入力し確認</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>顧客が金額確認を終えてから ACQP が正式に支払要求を送ります。</td></tr><tr><td>S07</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> Entry Code 支払を開始</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_entry_code" target="_blank" rel="noreferrer">pay (Entry Code)</a></td><td>Entry Code シナリオに対応する支払要求です。</td></tr><tr><td>S08</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 受理結果 / paymentUrl を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_entry_code" target="_blank" rel="noreferrer">pay (Entry Code)</a></td><td>ウォレットが次に進む確認ページ URL が返ります。</td></tr><tr><td>S09</td><td>青</td><td><code>ACQP</code> → <code>Wallet</code> 支払確認ページへ遷移</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_entry_code" target="_blank" rel="noreferrer">Entry Code guide</a></td><td>Entry Code 分岐はここでウォレット内の確認ページにユーザーを送ります。</td></tr><tr><td>S10</td><td>灰色</td><td><code>POS</code> → <code>ACQP</code> 動的注文を作成</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>Order Code 分岐では店舗がまず動的注文をバックエンドに要求します。</td></tr><tr><td>S11</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> Order Code 生成を要求</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>この分岐だけが公式バックエンドから動的 QR payload を受け取ります。</td></tr><tr><td>S12</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> Alipay+ 発行 order code を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>返るのは order code 内容であり、最終支払結果ではありません。</td></tr><tr><td>S13</td><td>灰色</td><td><code>ACQP</code> → <code>POS</code> 動的 order code を配布</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>ACQP が公式生成の動的コードを店舗端末に渡します。</td></tr><tr><td>S14</td><td>灰色</td><td><code>POS</code> → <code>Consumer</code> 動的 Order Code を表示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>顧客が見るのは店舗画面上の動的 QR です。</td></tr><tr><td>S15</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 動的コードをスキャン</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>顧客はウォレットで動的 order code を読み取ります。</td></tr><tr><td>S16</td><td>灰色</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> Order Code を decode</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_order_code" target="_blank" rel="noreferrer">pay (Order Code)</a></td><td>ウォレットが動的コードを公式バックエンドに渡して注文情報を復元します。</td></tr><tr><td>S17</td><td>灰色</td><td><code>POS</code> → <code>ACQP</code> 動的注文を作成</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>Private Order Code 分岐も同様に、スキャン前に店舗側で動的注文を作成します。</td></tr><tr><td>S18</td><td>灰色</td><td><code>ACQP</code> → <code>POS</code> ACQP 私有码を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>ここで返る QR は ACQP 自身が発行した private code です。</td></tr><tr><td>S19</td><td>灰色</td><td><code>POS</code> → <code>Consumer</code> Private Order Code を表示</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>店舗が表示するのは公式 order code ではなく ACQP private code です。</td></tr><tr><td>S20</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 私有码をスキャン</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>顧客は ACQP private code をウォレットで読み取ります。</td></tr><tr><td>S21</td><td>灰色</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> 私有码を渡して decode を要求</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/integration_merchant_mode_acq/accept_payment_private_order_code" target="_blank" rel="noreferrer">Private Order Code guide</a></td><td>ウォレットはまず公式バックエンドに読み取った内容を渡し、次の処理を判断させます。</td></tr><tr><td>S22</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 私有码 decode を要求</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_private_order_code" target="_blank" rel="noreferrer">userInitiatedPay</a></td><td>公式バックエンドが ACQP に merchant / order 詳細を要求します。</td></tr><tr><td>S23</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> merchant / order 詳細を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/pay_private_order_code" target="_blank" rel="noreferrer">userInitiatedPay</a></td><td>Private Order Code 分岐ではここで decode 後の業務情報を公式バックエンドに返します。</td></tr><tr><td>S24</td><td>灰色</td><td><code>Wallet</code> → <code>Consumer</code> 支払確認ページを表示</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>どの分岐でも確認ページは最終的にウォレット内で表示されます。</td></tr><tr><td>S25</td><td>灰色</td><td><code>Consumer</code> → <code>Wallet</code> 確認 / 認証</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>顧客はウォレット内でパスワードや生体認証による確認を行います。</td></tr><tr><td>S26</td><td>灰色</td><td><code>Wallet</code> → <code>Alipay+ Backend</code> 支払結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>ウォレット側確認結果が公式バックエンドに戻ります。</td></tr><tr><td>S27</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 非同期支払通知</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>3 つの merchant-presented 分岐は最終的に notifyPayment で ACQP に収束します。</td></tr><tr><td>S28</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 通知確認応答</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq_ns/notify_payment" target="_blank" rel="noreferrer">notifyPayment</a></td><td>自社バックエンドは通知処理後に成功応答を返します。</td></tr><tr><td>S29</td><td>赤</td><td><code>ACQP</code> → <code>Alipay+ Backend</code> 補償照会</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>通知欠落や状態不確実時は inquiryPayment を共通補償経路として使います。</td></tr><tr><td>S30</td><td>赤</td><td><code>Alipay+ Backend</code> → <code>ACQP</code> 照会結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/alipayplus/api_acq/inquiry_payment" target="_blank" rel="noreferrer">inquiryPayment</a></td><td>照会結果が order を success、failure、または継続 pending へ進めます。</td></tr><tr><td>S31</td><td>灰色</td><td><code>ACQP</code> → <code>POS</code> 支払結果を返却</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>自社バックエンドが最終状態を店舗端末に返します。</td></tr><tr><td>S32</td><td>灰色</td><td><code>POS</code> → <code>Cashier</code> 成功 / 失敗 / 処理中を表示</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>レジ担当は店舗端末の結果を見て取引完了か手動介入かを判断します。</td></tr><tr><td>S33</td><td>灰色</td><td><code>Cashier</code> → <code>Consumer</code> 販売を完了</td><td><a href="https://docs.alipayplus.com/alipayplus/acqp_payment_integration_overview_1.4.6?role=ACQP&amp;product=Payment1&amp;version=1.4.6" target="_blank" rel="noreferrer">Overview</a></td><td>merchant-presented の店頭販売フローはここで閉じます。</td></tr></tbody></table></section>
+        <section class="section"><h2>図 0. 全体システム構成図</h2><p>図 0 は必要なシステム間主経路だけを残し、A01-A18 の番号を付けています。店舗システムをどう自社プラットフォームへ取り込むか、決済成功・照合・精算・加盟店入金をどう分離するかを示します。署名、ジョブ、内部記録のような支援機能は、見やすさのため個別線ではなくプラットフォーム境界の中へ折り込んでいます。</p><figure class="diagram"><figcaption>図 0. 全体システム構成図</figcaption><img src="./diagrams/overall-system-architecture.svg" alt="overall architecture"></figure><table><thead><tr><th>番号</th><th>主経路</th><th>意味</th></tr></thead><tbody><tr><td>A01</td><td>消費者チャネル → API Gateway</td><td>App、Web、結果画面は 1 つの公開入口から決済作成と状態照会に入ります。</td></tr><tr><td>A02-A04</td><td>店舗 POS / ERP → Store Adapter → Unified Merchant API</td><td>店舗システムは Alipay+ へ直接接続しません。</td></tr><tr><td>A07-A10</td><td>自社バックエンド ↔ Alipay+ Payment APIs / wallet</td><td>サーバー API とウォレット側確認の主経路です。</td></tr><tr><td>A14-A18</td><td>照合 / 銀行 / 精算 / 加盟店入金</td><td>これは資金チェーンであり、非同期通知の完了とは別です。</td></tr></tbody></table><details><summary>図 0 のソースファイル</summary><p><a href="./diagrams/overall-system-architecture.puml">overall-system-architecture.puml</a> / <a href="./diagrams/overall-system-architecture.svg">overall-system-architecture.svg</a></p></details></section>
+        <section class="section"><h2>図 0B. 推奨デプロイトポロジー</h2><p>この図は配置方針に集中しています。クライアント / 店舗ネットワーク、公開入口、私有サービス、データと鍵、Alipay+ プラットフォーム、財務 / 銀行ゾーンを分けています。</p><figure class="diagram"><figcaption>図 0B. 推奨デプロイトポロジー</figcaption><img src="./diagrams/deployment-topology.svg" alt="deployment topology"></figure><table><thead><tr><th>配置番号</th><th>ゾーン</th><th>推奨</th></tr></thead><tbody><tr><td>D01-D02</td><td>クライアント / 店舗から公開入口</td><td>CDN / WAF などの管理されたエッジから入れます。</td></tr><tr><td>D04</td><td>非同期通知の配置</td><td>Alipay+ の非同期通知用に専用の公開エンドポイントを置き、内部ワーカーに渡します。</td></tr><tr><td>D06-D08</td><td>Alipay+ へのサーバー接続</td><td>鍵やサーバー API を端末へ出しません。</td></tr><tr><td>D13-D16</td><td>データ / セキュリティゾーン</td><td>orders、events、reconciliation を分離し、鍵は KMS に保存します。</td></tr></tbody></table><details><summary>図 0B のソースファイル</summary><p><a href="./diagrams/deployment-topology.puml">deployment-topology.puml</a> / <a href="./diagrams/deployment-topology.svg">deployment-topology.svg</a></p></details></section>
+        <section class="section"><h2>お金をどう計算するか</h2><p>公式文書は ACQP と Alipay+ の間の支払金額、手数料、照合ファイル、精算レポート、精算事実を定義しますが、最終的な加盟店入金式は定義していません。そこは自社の契約ベース精算ロジックです。</p><figure class="diagram"><figcaption>資金・照合・精算チェーン</figcaption><img src="./diagrams/funds-and-reconciliation-flow.svg" alt="funds flow"></figure><table><thead><tr><th>レイヤー</th><th>範囲</th><th>意味</th></tr></thead><tbody><tr><td>公式定義レイヤー</td><td>paymentAmount, settlementAmount, Fee Report, Settlement Report</td><td>ACQP と Alipay+ の公式金融事実です。</td></tr><tr><td>自社内部精算レイヤー</td><td>merchant gross, platform fee, tax, merchant net</td><td>自社の加盟店入金ロジックが扱う領域です。</td></tr><tr><td>原則</td><td>callback success ≠ settlement complete ≠ payout ready</td><td>各境界は照合と銀行事実で確認する必要があります。</td></tr></tbody></table></section>
+      </div>
+    </main>
+  </div>
+  <div id="lightbox">
+    <div class="lightbox-panel">
+      <div class="lightbox-toolbar">
+        <strong id="lightboxTitle">Diagram preview</strong>
+        <span>图 0 / 图 0B 这类字体较密的图会默认放大。可继续缩放或在新窗口打开。</span>
+        <div class="spacer"></div>
+        <button type="button" id="lightboxZoomOut">-</button>
+        <button type="button" id="lightboxZoomIn">+</button>
+        <button type="button" id="lightboxReset">重置</button>
+        <a id="lightboxOpenNew" href="#" target="_blank" rel="noreferrer">新窗口打开</a>
+        <button type="button" id="lightboxClose">关闭</button>
+      </div>
+      <div class="lightbox-stage">
+        <img alt="zoomed diagram">
+      </div>
+    </div>
+  </div>
+  <script>
+    const buttons = document.querySelectorAll('.lang-btn');
+    const panes = document.querySelectorAll('.lang-pane');
+    function activateLang(lang) {
+      buttons.forEach((item) => item.classList.toggle('active', item.dataset.lang === lang));
+      panes.forEach((pane) => pane.classList.toggle('active', pane.dataset.langPane === lang));
+    }
+    const params = new URLSearchParams(window.location.search);
+    const initialLang = params.get('lang');
+    if (initialLang && ['zh', 'en', 'ja'].includes(initialLang)) {
+      activateLang(initialLang);
+    }
+    buttons.forEach((button) => {
+      button.addEventListener('click', () => {
+        const lang = button.dataset.lang;
+        activateLang(lang);
+        const url = new URL(window.location.href);
+        url.searchParams.set('lang', lang);
+        history.replaceState(null, '', url.toString());
+      });
+    });
+    const lightbox = document.getElementById('lightbox');
+    const lightboxImg = lightbox.querySelector('img');
+    const lightboxTitle = document.getElementById('lightboxTitle');
+    const lightboxOpenNew = document.getElementById('lightboxOpenNew');
+    const lightboxStage = lightbox.querySelector('.lightbox-stage');
+    const lightboxPanel = lightbox.querySelector('.lightbox-panel');
+    const zoomInButton = document.getElementById('lightboxZoomIn');
+    const zoomOutButton = document.getElementById('lightboxZoomOut');
+    const resetButton = document.getElementById('lightboxReset');
+    const closeButton = document.getElementById('lightboxClose');
+    let currentZoom = 1;
+    let defaultZoom = 1.2;
+
+    function applyZoom() {
+      lightboxImg.style.transform = `scale(${currentZoom})`;
+    }
+
+    function computeDefaultZoom(src) {
+      if (src.includes('overall-system-architecture') || src.includes('deployment-topology')) return 2.1;
+      if (src.includes('funds-and-reconciliation-flow')) return 1.7;
+      return 1.2;
+    }
+
+    function openLightbox(img) {
+      const caption = img.closest('figure')?.querySelector('figcaption')?.textContent?.trim() || 'Diagram preview';
+      defaultZoom = computeDefaultZoom(img.src);
+      currentZoom = defaultZoom;
+      lightboxTitle.textContent = caption;
+      lightboxImg.src = img.src;
+      lightboxOpenNew.href = img.src;
+      lightbox.classList.add('open');
+      applyZoom();
+      lightboxStage.scrollTop = 0;
+      lightboxStage.scrollLeft = 0;
+    }
+
+    document.querySelectorAll('figure.diagram img').forEach((img) => {
+      img.addEventListener('click', () => openLightbox(img));
+    });
+
+    zoomInButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      currentZoom = Math.min(currentZoom + 0.2, 4);
+      applyZoom();
+    });
+
+    zoomOutButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      currentZoom = Math.max(currentZoom - 0.2, 0.4);
+      applyZoom();
+    });
+
+    resetButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      currentZoom = defaultZoom;
+      applyZoom();
+      lightboxStage.scrollTop = 0;
+      lightboxStage.scrollLeft = 0;
+    });
+
+    closeButton.addEventListener('click', (event) => {
+      event.stopPropagation();
+      lightbox.classList.remove('open');
+    });
+
+    lightboxPanel.addEventListener('click', (event) => event.stopPropagation());
+    lightbox.addEventListener('click', () => lightbox.classList.remove('open'));
+    window.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape') lightbox.classList.remove('open');
+    });
+    const preview = params.get('preview');
+    const zoom = Number(params.get('zoom'));
+    if (preview) {
+      const target = Array.from(document.querySelectorAll('figure.diagram img')).find((img) => img.src.includes(preview));
+      if (target) {
+        openLightbox(target);
+        if (!Number.isNaN(zoom) && zoom > 0) {
+          currentZoom = Math.min(Math.max(zoom, 0.4), 4);
+          applyZoom();
+        }
+      }
+    }
+  </script>
+</body>
+</html>

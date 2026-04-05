@@ -1,0 +1,44 @@
+@startuml
+title Merchant Registration - Optional in Flow, Mandatory in Some Regions
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 12
+skinparam ArrowColor #4A5568
+skinparam ParticipantBorderColor #5B6B82
+skinparam ActorBorderColor #5B6B82
+
+legend right
+|= Color |= System |
+|<#FFF2CC>| Merchant Operations |
+|<#CFE2FF>| Your Backend / Backoffice |
+|<#F4CCCC>| Alipay+ Backend |
+----
+|<#C0392B>| Red arrows = Alipay+ backend API calls |
+endlegend
+
+actor "Merchant Ops" as Ops #FFF2CC
+participant "Your Backoffice" as Backoffice #CFE2FF
+participant "Alipay+ Backend" as AP #F4CCCC
+participant "Registration Poller" as Poller #CFE2FF
+
+autonumber "S00"
+
+Ops -> Backoffice: Submit merchant KYC and profile
+Backoffice -[#C0392B]> AP: registration(registrationRequestId,\nreferenceMerchantId,\nproductCodes=[CASHIER_PAYMENT],\nregistrationNotifyUrl?)
+AP -[#C0392B]--> Backoffice: API result S, F, or U
+
+alt API accepted
+  AP -[#C0392B]> Backoffice: notifyRegistrationStatus(...) if configured
+  Backoffice -> Backoffice: Validate signature and update merchant status
+  Backoffice -[#C0392B]--> AP: HTTP 200 + resultStatus=S
+  loop Daily or agreed interval until completed
+    Poller -[#C0392B]> AP: inquiryRegistrationStatus(referenceMerchantId or registrationRequestId)
+    AP -[#C0392B]--> Poller: registrationStatus + PSP results
+    Poller -> Backoffice: Update merchant status
+  end
+  Backoffice -> Ops: Merchant approved, rejected, or pending
+else Failed or unknown
+  Backoffice -> Ops: Fix data or retry per idempotency rule
+end
+@enduml

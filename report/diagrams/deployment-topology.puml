@@ -1,0 +1,122 @@
+@startuml
+title Deployment Topology for Alipay+ ACQP Integration
+top to bottom direction
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam roundcorner 14
+skinparam linetype ortho
+skinparam nodesep 50
+skinparam ranksep 60
+skinparam packageStyle rectangle
+skinparam ArrowColor #4A5568
+skinparam packageBorderColor #5B6B82
+skinparam componentBorderColor #5B6B82
+skinparam databaseBorderColor #5B6B82
+skinparam queueBorderColor #5B6B82
+
+legend right
+|= Color |= Zone |
+|<#D4F1EA>| Client / store network |
+|<#CFE2FF>| Your public edge / app zone |
+|<#E8F0FE>| Your private service zone |
+|<#F5F5F5>| Your data / security zone |
+|<#FCE5CD>| Alipay+ client layer |
+|<#F4CCCC>| Alipay+ platform |
+|<#FFF2CC>| Finance / bank zone |
+endlegend
+
+package "Client / Store Network" #D4F1EA {
+  [Mobile App]
+  [Web / H5]
+  [Store POS / Adapter]
+}
+
+package "Public Edge / DMZ" #CFE2FF {
+  [CDN / WAF]
+  [Public API Gateway]
+  [Public Callback Endpoint]
+}
+
+package "Private Service Zone" #E8F0FE {
+  [Merchant API]
+  [Payment & Order Service]
+  [Callback Worker]
+  [Registration / Refund Service]
+  [Reconciliation / Settlement Service]
+  [Merchant Notification Service]
+  queue "Async Queue" as Queue
+}
+
+package "Data / Security Zone" #F5F5F5 {
+  database "Order DB" as OrderDB
+  database "Event DB" as EventDB
+  database "Ledger / Recon DB" as LedgerDB
+  [Key Vault / KMS]
+  [Observability]
+}
+
+package "Alipay+ Client Layer" #FCE5CD {
+  [Checkout / SDK]
+}
+
+package "Alipay+ Platform" #F4CCCC {
+  [Payment APIs]
+  [Registration APIs]
+  [Callback Dispatch]
+  [Recon Reports]
+}
+
+package "Finance / Bank Zone" #FFF2CC {
+  [Finance Console]
+  [ACQP Settlement Account]
+  [Merchant Bank Account]
+}
+
+[Mobile App] --> [CDN / WAF] : D01\nHTTPS
+[Web / H5] --> [CDN / WAF] : D01\nHTTPS
+[Store POS / Adapter] --> [CDN / WAF] : D01\nHTTPS / VPN / private line
+[CDN / WAF] --> [Public API Gateway] : D02\nfiltered public ingress
+
+[Public API Gateway] --> [Merchant API] : D03\nunified authenticated entry
+[Public Callback Endpoint] --> [Callback Worker] : D04\nnotifyPayment / notifyRegistrationStatus
+
+[Merchant API] --> [Payment & Order Service] : D05\npay / inquiry / order state
+[Merchant API] --> [Registration / Refund Service] : D05\nregistration / refund / cancel
+[Payment & Order Service] --> [Checkout / SDK] : D06\nnormalUrl / checkout handoff
+[Payment & Order Service] --> [Payment APIs] : D07\nserver-to-server payment APIs
+[Registration / Refund Service] --> [Registration APIs] : D08\nregistration APIs
+[Callback Dispatch] --> [Public Callback Endpoint] : D09\nAlipay+ callback ingress
+[Recon Reports] --> [Reconciliation / Settlement Service] : D10\nreport download / parse
+
+[Payment & Order Service] --> Queue : D11\nasync jobs
+[Callback Worker] --> Queue : D11\nevent fan-out
+[Queue] --> [Merchant Notification Service] : D12\nstore / merchant push
+[Queue] --> [Reconciliation / Settlement Service] : D12\nscheduled jobs
+
+[Payment & Order Service] --> OrderDB : D13\norders / payments
+[Callback Worker] --> EventDB : D14\nraw callbacks / signatures
+[Reconciliation / Settlement Service] --> LedgerDB : D15\nledger / recon facts
+[Key Vault / KMS] --> [Payment & Order Service] : D16\nsign / verify material
+[Key Vault / KMS] --> [Callback Worker] : D16\npublic key / private key access
+[Observability] --> [Payment & Order Service] : D17\nlogs / metrics / alerts
+[Observability] --> [Callback Worker] : D17\nlogs / metrics / alerts
+[Observability] --> [Reconciliation / Settlement Service] : D17\nlogs / metrics / alerts
+
+[Reconciliation / Settlement Service] --> [ACQP Settlement Account] : D18\nbank / settlement confirmation
+[Reconciliation / Settlement Service] --> [Merchant Bank Account] : D19\nmerchant payout instruction
+[Finance Console] --> [Reconciliation / Settlement Service] : D20\nrecon review / payout review
+
+note bottom of [Public Callback Endpoint]
+Expose callback on a dedicated public endpoint.
+Keep business processing behind the worker boundary.
+end note
+
+note bottom of [Store POS / Adapter]
+Store systems connect to your edge, not directly to Alipay+.
+end note
+
+note bottom of [Key Vault / KMS]
+Private keys stay in managed security infrastructure,
+not in app binaries or store devices.
+end note
+@enduml

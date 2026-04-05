@@ -1,0 +1,76 @@
+@startuml
+title Funds, Clearing, Settlement, and Merchant Payout
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 12
+skinparam ArrowColor #4A5568
+skinparam ParticipantBorderColor #5B6B82
+skinparam ActorBorderColor #5B6B82
+
+legend right
+|= Color |= System |
+|<#FFF2CC>| Customer / Finance |
+|<#E2F7E2>| Your store-side systems |
+|<#CFE2FF>| Your backend / ACQP core |
+|<#F4CCCC>| Alipay+ backend / reports |
+|<#F5F5F5>| Ledger / bank / report record |
+----
+|<#C0392B>| Red arrows = Alipay+ API or report interactions |
+|<#2E8B57>| Green arrows = internal ledger or payout actions |
+endlegend
+
+actor Customer #FFF2CC
+participant "Store POS / App" as Store #E2F7E2
+participant "Your Backend / ACQP" as ACQP #CFE2FF
+participant "Alipay+ APIs" as AP #F4CCCC
+database "Ledger DB" as Ledger #F5F5F5
+participant "Reconciliation Service" as Recon #CFE2FF
+participant "Reconciliation Reports" as Reports #F4CCCC
+participant "Clearing Bank" as Bank #F5F5F5
+participant "ACQP Settlement Account" as Acct #F5F5F5
+participant "Merchant Settlement Engine" as MSE #CFE2FF
+participant "Merchant / Store Bank Account" as StoreBank #F5F5F5
+
+autonumber "S00"
+
+Customer -> Store: Pay for order
+Store -> ACQP: Create payment\n(paymentAmount / orderAmount,\nsettlement currency config)
+ACQP -[#C0392B]> AP: pay(...,\npaymentAmount,\nsettlementStrategy.settlementCurrency)
+AP -[#C0392B]--> ACQP: payment accepted / final result
+note over ACQP, AP
+Official amount layers:
+- paymentAmount = transaction amount
+- settlementAmount / settlementQuote
+  are returned on success when applicable
+end note
+ACQP -[#2E8B57]> Ledger: Book gross transaction\nand provisional receivable
+
+Reports -[#C0392B]> Recon: T+1 transaction detail report
+Reports -[#C0392B]> Recon: T+1 fee report
+Reports -[#C0392B]> Recon: T+1 transaction summary report
+Recon -[#2E8B57]> Ledger: Match transaction amount,\nsettlement amount, and fees
+
+Reports -[#C0392B]> Bank: Settlement report / batch
+Bank -[#2E8B57]> Acct: Net settlement funds\non agreed value date
+Recon -[#2E8B57]> Ledger: Confirm net settlement amount,\nsettlement batch, value date
+
+MSE -[#2E8B57]> Ledger: Apply merchant contract rule
+note over MSE, Ledger
+Official docs define ACQP-level settlement
+and reconciliation facts.
+Merchant payout is still your own
+contract and finance rule.
+end note
+MSE -[#2E8B57]> StoreBank: Payout merchant / store funds
+
+note over Recon, Reports
+Official reconciliation set:
+Transaction Detail Report,
+Fee Report,
+Transaction Summary Report,
+Settlement Report.
+These reports define ACQP-level
+calculation inputs, not merchant payout policy.
+end note
+@enduml

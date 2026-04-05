@@ -1,0 +1,85 @@
+@startuml
+title UC-2 Merchant-presented Mode Payment - Customer Scans Merchant QR
+skinparam backgroundColor white
+skinparam shadowing false
+skinparam sequenceMessageAlign center
+skinparam roundcorner 12
+skinparam dpi 140
+skinparam defaultFontName Arial
+skinparam defaultFontSize 11
+skinparam titleFontSize 15
+skinparam legendFontSize 10
+skinparam participantFontSize 11
+skinparam actorFontSize 11
+skinparam sequenceArrowFontSize 10
+skinparam ArrowColor #4A5568
+skinparam ParticipantBorderColor #5B6B82
+skinparam ActorBorderColor #5B6B82
+
+legend right
+|= Color |= System |
+|<#FFF2CC>| Consumer / Merchant |
+|<#D4F1EA>| Your POS / QR display |
+|<#CFE2FF>| Your Backend / ACQP |
+|<#F4CCCC>| Alipay+ backend |
+|<#E1D5E7>| MPP Wallet |
+----
+|<#2F80ED>| Blue arrows = Alipay+ SDK / checkout calls |
+|<#C0392B>| Red arrows = Alipay+ backend API calls |
+|<#4A5568>| Gray arrows = non-Alipay API / SDK steps |
+endlegend
+
+actor Consumer #FFF2CC
+actor "Store Cashier" as Cashier #FFF2CC
+participant "Your POS / QR Display" as POS #D4F1EA
+participant "Your Backend / ACQP" as ACQP #CFE2FF
+participant "Alipay+ Backend" as AP #F4CCCC
+participant "MPP Wallet" as Wallet #E1D5E7
+
+autonumber "S00"
+
+Cashier -> POS: Create order / amount
+alt Entry code
+  POS --> Consumer: Show ACQP-issued static entry QR
+  note over POS
+  Merchant-presented means the store shows the QR.
+  It does not mean Alipay+ always generates the QR.
+  end note
+  Consumer -> Wallet: Scan merchant QR
+  Wallet -> ACQP: Open merchant page URL in entry QR
+  ACQP --> Consumer: Render merchant page / amount entry
+  Consumer -> ACQP: Enter amount and confirm
+  ACQP -[#C0392B]> AP: pay(entry code scenario)
+  AP -[#C0392B]--> ACQP: payment accepted / paymentUrl
+  ACQP -[#2F80ED]--> Wallet: Redirect to payment confirmation page
+else Order code
+  POS -> ACQP: Create dynamic order
+  ACQP -[#C0392B]> AP: pay(order code scenario)
+  AP -[#C0392B]--> ACQP: Alipay+-issued order code
+  ACQP --> POS: Sync order QR to store
+  POS --> Consumer: Show dynamic order QR
+  Consumer -> Wallet: Scan merchant QR
+  Wallet -> AP: Decode order code
+else Private order code
+  POS -> ACQP: Create dynamic order
+  ACQP --> POS: Return ACQP-issued private QR
+  POS --> Consumer: Show private order QR
+  Consumer -> Wallet: Scan merchant QR
+  Wallet -> AP: Decode private code
+  AP -[#C0392B]> ACQP: userInitiatedPay(decode request)
+  ACQP -[#C0392B]--> AP: Return merchant/order details
+end
+
+Wallet -> Consumer: Show payment confirmation
+Consumer -> Wallet: Confirm / authenticate
+Wallet --> AP: Payment result
+AP -[#C0392B]> ACQP: notifyPayment(final status)
+ACQP -[#C0392B]--> AP: SUCCESS ack
+opt Callback missing or status still uncertain
+  ACQP -[#C0392B]> AP: inquiryPayment(paymentRequestId or paymentId)
+  AP -[#C0392B]--> ACQP: paymentResult S, F, or U
+end
+ACQP --> POS: Payment result
+POS --> Cashier: Show success / fail / pending
+Cashier --> Consumer: Complete sale
+@enduml
