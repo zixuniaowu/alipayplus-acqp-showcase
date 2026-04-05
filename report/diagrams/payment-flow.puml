@@ -44,7 +44,7 @@ ACQP -[#C0392B]> AP: pay(paymentRequestId,\npaymentNotifyUrl,\npaymentRedirectUr
 AP -[#C0392B]--> ACQP: resultStatus=U,\npaymentId,\nnormalUrl or paymentData
 ACQP --> Client: Checkout payload
 Client -[#2F80ED]> APC: Open normalUrl or SDK checkout
-User -> AP: Choose wallet on checkout page
+User -> APC: Choose wallet on checkout page
 APC -> MPP: Redirect, deep link, or QR
 User -> MPP: Authenticate and confirm payment
 MPP --> APC: Final payment result
